@@ -56,7 +56,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void testAnySumSubsequence() {
+    public void testAnySumSubSequence() {
         Interpreter interpreter = new Interpreter();
         assertEquals(6, interpreter.expr("1+2+3"));
         assertEquals(-80, interpreter.expr("10 + 10 - 100"));
