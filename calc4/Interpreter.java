@@ -1,7 +1,5 @@
 package calc4;
 
-import java.util.ArrayList;
-
 // Простой калькулятор для вычисления арифметических выражений.
 // Поддерживает арифметические выражения без скобок.
 // Грамматика:
@@ -73,6 +71,6 @@ public class Interpreter {
     }
     
     public static void main(String[] args) {
-        // String expression = args[1];
+   
     }
 }
