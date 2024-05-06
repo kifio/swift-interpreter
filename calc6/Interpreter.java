@@ -52,18 +52,17 @@ public class Interpreter {
             currentToken = lexer.readNextToken();
             var node = expr();
             currentToken = lexer.readNextToken();
-            if (currentToken.type() != Token.Type.RPAREN) {
-                return node;
-            }
+            return node;
         }
 
         throw new IllegalStateException(
-            String.format("Не удалось получить значение оператора")
+            String.format("Не удалось получить значение оператора. Обрабатываемый токен: %s", currentToken.type())
         );
     }
     
     public static void main(String[] args) {
-        var ast = new Interpreter().interpret("1 + (4 * 2) * 2");
+        // var ast = new Interpreter().interpret("1 + (4 * 2) * 2");
+        var ast = new Interpreter().interpret("7 + 3 * (10 / (12 / (3 + 1) - 1))");
         System.out.println(ast);
     }
 }
