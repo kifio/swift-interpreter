@@ -61,8 +61,8 @@ public class Interpreter {
     }
     
     public static void main(String[] args) {
-        // var ast = new Interpreter().interpret("1 + (4 * 2) * 2");
-        var ast = new Interpreter().interpret("7 + 3 * (10 / (12 / (3 + 1) - 1))");
-        System.out.println(ast);
+        System.out.println(new Interpreter().interpret("1 + (4 * 2) * 2").calculate() == 17);
+        System.out.println(new Interpreter().interpret("2 * 7 + 3").calculate() == 17);
+        System.out.println(new Interpreter().interpret("7 + 3 * (10 / (12 / (3 + 1) - 1))").calculate() == 22);
     }
 }

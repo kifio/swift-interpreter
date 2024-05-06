@@ -11,10 +11,10 @@ public class InterpreterTest {
     @Test
     public void testAnyMulDivSequence() {
         Interpreter interpreter = new Interpreter();
-        assertEquals(160, interpreter.interpret("10 * ((4 * 2)) * 2"));
-        assertEquals(30, interpreter.interpret("10 * 4  * (2 * 3) / 8"));
-        assertEquals(-24, interpreter.interpret("(14 + 2) * (3 - 6) / 2"));
-        assertEquals(962, interpreter.interpret("2 * (3 + ((4 + 18))) - 87 +111 * 9"));
-        assertEquals(1076, interpreter.interpret("2 * 3 + 4 / 2 + 18 - 80 * 2 + 110 * (9 + 2)"));
+        assertEquals(160, interpreter.interpret("10 * ((4 * 2)) * 2").calculate());
+        assertEquals(30, interpreter.interpret("10 * 4  * (2 * 3) / 8").calculate());
+        assertEquals(-24, interpreter.interpret("(14 + 2) * (3 - 6) / 2").calculate());
+        assertEquals(962, interpreter.interpret("2 * (3 + ((4 + 18))) - 87 +111 * 9").calculate());
+        assertEquals(1076, interpreter.interpret("2 * 3 + 4 / 2 + 18 - 80 * 2 + 110 * (9 + 2)").calculate());
     }
 }
