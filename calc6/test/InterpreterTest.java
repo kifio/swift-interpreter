@@ -1,10 +1,10 @@
-package calc5.test;
+package calc6.test;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import calc5.Interpreter;
+import calc6.Interpreter;
 
 public class InterpreterTest {
 
