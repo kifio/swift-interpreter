@@ -1,4 +1,4 @@
-package calc6;
+package calc7;
 
 // Простой калькулятор для вычисления арифметических выражений.
 // Поддерживает арифметические выражения без скобок.
@@ -44,7 +44,12 @@ public class Interpreter {
     }
     
     private AbstractSyntaxTree factor() {
-        if (currentToken.type() == Token.Type.INTEGER) {
+        if (currentToken.isSumOrSub()) {
+            var op = currentToken;
+            currentToken = lexer.readNextToken();
+            var node = new UnaryOperation(op, factor());
+            return node;
+        } else if (currentToken.type() == Token.Type.INTEGER) {
             var node = new Number(currentToken);
             currentToken = lexer.readNextToken(); 
             return node;
@@ -60,5 +65,6 @@ public class Interpreter {
         );
     }
     
-    public static void main(String[] args) {}
+    public static void main(String[] args) {
+    }
 }
