@@ -129,6 +129,12 @@ class Lexer {
             case '=':
                 type = Token.Type.ASSIGN;
                 break;
+            case '\n':  // Есть опасения, что в Windows не заработает тк там \t\n.
+                type = Token.Type.NEW_LINE;
+                break;
+            case ';':
+                type = Token.Type.SEMI;
+                break;
             default:
                 throw new IllegalStateException(String.format("Неподдерживаемый символ %s позиция %d", currentChar, pos));
         }

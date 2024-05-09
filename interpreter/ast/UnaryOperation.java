@@ -1,6 +1,8 @@
-package interpreter;
+package interpreter.ast;
 
-record UnaryOperation(
+import interpreter.Token;
+
+public record UnaryOperation(
     Token opToken,
     AbstractSyntaxTree right
 ) implements AbstractSyntaxTree {

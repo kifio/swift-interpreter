@@ -1,6 +1,8 @@
-package interpreter;
+package interpreter.ast;
 
-record BinaryOperation(
+import interpreter.Token;
+
+public record BinaryOperation(
     AbstractSyntaxTree left,
     Token opToken,
     AbstractSyntaxTree right

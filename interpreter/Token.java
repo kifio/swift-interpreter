@@ -1,15 +1,20 @@
 package interpreter;
 
-record Token(Type type, String value) {
-    enum Type {
+public record Token(Type type, String value) {
+
+    public enum Type {
         VAR, LET,
         ID,
         ASSIGN,
+        NEW_LINE, SEMI,
         INTEGER, 
         PLUS, MINUS, MUL, DIV,
         LPAREN, RPAREN,
         EOF;
     }   
+
+    public static final Token NEW_LINE = new Token(Type.NEW_LINE, "\n");
+    public static final Token SEMI = new Token(Type.SEMI, ";");
 
     boolean isOperation() {
         return type().ordinal() >= 1 && type().ordinal() < Type.values().length - 1;
