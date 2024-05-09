@@ -13,7 +13,7 @@ class Lexer {
 
     {
         keyWords.put(KeyWord.LET, new Token(Token.Type.LET, KeyWord.LET));
-        keyWords.put(KeyWord.VAR, new Token(Token.Type.LET, KeyWord.VAR));
+        keyWords.put(KeyWord.VAR, new Token(Token.Type.VAR, KeyWord.VAR));
     }
 
     void initialize(String expression) {

@@ -6,7 +6,11 @@ public record Compound(List<AbstractSyntaxTree> statementList) implements Abstra
 
     @Override
     public int calculate() {
-        throw new UnsupportedOperationException("Unimplemented method 'calculate'");
+        for (AbstractSyntaxTree statement : statementList) {
+            statement.calculate();
+        }
+
+        return 0;
     }
 
 }

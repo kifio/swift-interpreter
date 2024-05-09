@@ -17,6 +17,7 @@ package interpreter;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import interpreter.ast.*;
@@ -26,6 +27,8 @@ public class Interpreter {
 
     private Lexer lexer = new Lexer();
     private Token currentToken;
+
+    public static HashMap<String, Integer> SYMBOL_TABLE = new HashMap<>(); 
 
     public AbstractSyntaxTree interpret(String expression) {
         lexer.initialize(expression);
@@ -45,8 +48,13 @@ public class Interpreter {
         var statements = new ArrayList<AbstractSyntaxTree>();
         statements.add(statement());
 
-        while (currentToken.equals(Token.NEW_LINE) || currentToken.equals(Token.NEW_LINE)) {
+        while (currentToken.equals(Token.NEW_LINE) || currentToken.equals(Token.SEMI)) {
             currentToken = lexer.readNextToken();
+
+            if (currentToken.equals(Token.NEW_LINE) || currentToken.equals(Token.SEMI)) {
+                continue;
+            }
+
             statements.add(statement());
         }
 
@@ -140,11 +148,17 @@ public class Interpreter {
     
     public static void main(String[] args) {
         var swiftCode = """
-            var number = 2 * 2
-            let a = number - 2 + (11) + (12 - 2)
+            var number = 2
+            let a = number
+            let b = 10 * a + 10 * number / 4;
+
+            ;
+            var c = a - -b
+            let x = 11
                 """;
 
         var ast = new Interpreter().interpret(swiftCode.trim());
         System.out.println(ast);
+        System.out.println(ast.calculate());
     }
 }
