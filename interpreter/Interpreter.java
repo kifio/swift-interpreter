@@ -16,19 +16,28 @@ package interpreter;
  * variable: ID
  */
 
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import interpreter.ast.*;
+import interpreter.ast.AbstractSyntaxTree;
+import interpreter.ast.Assign;
+import interpreter.ast.BinaryOperation;
+import interpreter.ast.Compound;
 import interpreter.ast.Number;
+import interpreter.ast.UnaryOperation;
+import interpreter.ast.Variable;
 
 public class Interpreter {
 
     private Lexer lexer = new Lexer();
     private Token currentToken;
 
-    public static HashMap<String, Integer> SYMBOL_TABLE = new HashMap<>(); 
+    public static HashMap<String, Integer> SYMBOL_TABLE = new HashMap<>();
 
     public AbstractSyntaxTree interpret(String expression) {
         lexer.initialize(expression);
@@ -79,14 +88,16 @@ public class Interpreter {
         currentToken = lexer.readNextToken();
 
         if (currentToken.type() != Token.Type.ID) {
-            throw new IllegalStateException("Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной."); 
+            throw new IllegalStateException(
+                    "Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной.");
         }
 
         var variableName = new Variable(type, currentToken);
         currentToken = lexer.readNextToken();
 
         if (currentToken.type() != Token.Type.ASSIGN) {
-            throw new IllegalStateException("Некорректный токен: " + currentToken.type() + " Ожидался оператор присваивания."); 
+            throw new IllegalStateException(
+                    "Некорректный токен: " + currentToken.type() + " Ожидался оператор присваивания.");
         }
 
         var assignToken = currentToken;
@@ -106,7 +117,7 @@ public class Interpreter {
 
         return left;
     }
-    
+
     private AbstractSyntaxTree term() {
         var left = factor();
 
@@ -118,7 +129,7 @@ public class Interpreter {
 
         return left;
     }
-    
+
     private AbstractSyntaxTree factor() {
         if (currentToken.isSumOrSub()) {
             var op = currentToken;
@@ -127,7 +138,7 @@ public class Interpreter {
             return node;
         } else if (currentToken.type() == Token.Type.INTEGER) {
             var node = new Number(currentToken);
-            currentToken = lexer.readNextToken(); 
+            currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.LPAREN) {
             currentToken = lexer.readNextToken();
@@ -135,30 +146,39 @@ public class Interpreter {
             currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.ID) {
-            // небольшой хак, в rvalue все переменные пока что let, так как они там не изменяются 
+            // небольшой хак, в rvalue все переменные пока что let, так как они там не
+            // изменяются
             var node = new Variable(new Token(Token.Type.LET, "let"), currentToken);
-            currentToken = lexer.readNextToken(); 
+            currentToken = lexer.readNextToken();
             return node;
         }
 
         throw new IllegalStateException(
-            String.format("Не удалось получить значение оператора. Обрабатываемый токен: %s", currentToken.type())
-        );
+                String.format("Не удалось получить значение оператора. Обрабатываемый токен: %s", currentToken.type()));
     }
-    
+
     public static void main(String[] args) {
-        var swiftCode = """
-            var number = 2
-            let a = number
-            let b = 10 * a + 10 * number / 4;
+        try {
+            Path contents = FileSystems
+                    .getDefault()
+                    .getPath("")
+                    .resolve("SwiftPlayground.playground")
+                    .resolve("Contents.swift");
 
-            ;
-            var c = a - -b
-            let x = 11
-                """;
+            System.out.println(contents.toAbsolutePath());
 
-        var ast = new Interpreter().interpret(swiftCode.trim());
-        System.out.println(ast);
-        System.out.println(ast.calculate());
+            StringBuilder sb = new StringBuilder();
+            List<String> lines = Files.readAllLines(contents);
+
+            for (String line : lines) {
+                sb.append(line);
+                sb.append('\n');
+            }
+
+            var ast = new Interpreter().interpret(sb.toString().trim());
+            System.out.println(ast.calculate());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

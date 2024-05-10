@@ -58,7 +58,7 @@ class Lexer {
         letterCharacters.add(currentChar);
         pos += 1;
 
-        while (pos <= text.length - 1 && ((text[pos] >= 'a' && text[pos] <= 'z') || (text[pos] >= 'A' && text[pos] <= 'Z'))) {
+        while (pos <= text.length - 1 && (Character.isDigit(text[pos]) || (text[pos] >= 'a' && text[pos] <= 'z') || (text[pos] >= 'A' && text[pos] <= 'Z'))) {
             letterCharacters.add(text[pos]);
             pos += 1;
         }
