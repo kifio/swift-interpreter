@@ -162,10 +162,8 @@ public class Interpreter {
             Path contents = FileSystems
                     .getDefault()
                     .getPath("")
-                    .resolve("SwiftPlayground.playground")
-                    .resolve("Contents.swift");
-
-            System.out.println(contents.toAbsolutePath());
+                    .resolve("interpreter")
+                    .resolve("Contents_1000.swift");
 
             StringBuilder sb = new StringBuilder();
             List<String> lines = Files.readAllLines(contents);
