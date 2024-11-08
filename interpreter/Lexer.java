@@ -31,7 +31,7 @@ class Lexer {
         
         if (Character.isDigit(text[pos])) {
             return readInteger(text[pos]);
-        } else if (((text[pos] >= 'a' && text[pos] <= 'z') || (text[pos] >= 'A' && text[pos] <= 'Z'))) {
+        } else if (isPartOfWord(text[pos])) {
             return readWord(text[pos]);
         } else {
             return readSign(text[pos]);
@@ -58,7 +58,7 @@ class Lexer {
         letterCharacters.add(currentChar);
         pos += 1;
 
-        while (pos <= text.length - 1 && (Character.isDigit(text[pos]) || (text[pos] >= 'a' && text[pos] <= 'z') || (text[pos] >= 'A' && text[pos] <= 'Z'))) {
+        while (pos <= text.length - 1 && (Character.isDigit(text[pos]) || isPartOfWord(text[pos]))) {
             letterCharacters.add(text[pos]);
             pos += 1;
         }
@@ -145,5 +145,9 @@ class Lexer {
             type, 
             new String(new char[]{ currentChar })
         );
+    }
+
+    private boolean isPartOfWord(char c) {
+        return c == '_' || ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
     }
 }
