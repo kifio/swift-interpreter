@@ -163,7 +163,7 @@ public class Interpreter {
                     .getDefault()
                     .getPath("")
                     .resolve("interpreter")
-                    .resolve("Contents_1000.swift");
+                    .resolve("Contents.swift");
 
             StringBuilder sb = new StringBuilder();
             List<String> lines = Files.readAllLines(contents);

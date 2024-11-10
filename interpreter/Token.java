@@ -7,9 +7,11 @@ public record Token(Type type, String value) {
         ID,
         ASSIGN,
         NEW_LINE, SEMI,
-        INTEGER, 
+        INTEGER, DOUBLE,
+        INT_TYPE, DOUBLE_TYPE,
         PLUS, MINUS, MUL, DIV,
         LPAREN, RPAREN,
+        COMMENT,
         EOF;
     }   
 

@@ -39,12 +39,8 @@ class Lexer {
     }
 
     // Возвращает следующий символ не увеличивая позицию обрабатываемого символа
-    private char peek() {
-        if (pos + 1 > text.length - 1) {
-            return ' ';
-        } else {
-            return text[pos + 1];
-        }
+    private void skipComment() {
+        // Если прочитал // или /*, то обрабатывать комментарий соотв. образом
     }
 
     private void skipWhiteSpace() {
