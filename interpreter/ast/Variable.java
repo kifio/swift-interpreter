@@ -3,10 +3,10 @@ package interpreter.ast;
 import interpreter.Interpreter;
 import interpreter.Token;
 
-public record Variable(Token type, Token value) implements AbstractSyntaxTree {
+public record Variable(Token type, Token valueType, Token value) implements AbstractSyntaxTree {
 
     @Override
-    public int calculate() {
+    public double calculate() {
         if (Interpreter.SYMBOL_TABLE.containsKey(this.value.value())) {
             return Interpreter.SYMBOL_TABLE.get(this.value.value());
         } else {

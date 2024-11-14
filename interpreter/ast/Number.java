@@ -4,7 +4,7 @@ import interpreter.Token;
 
 public record Number(Token token) implements AbstractSyntaxTree {
     @Override
-    public int calculate() {
-        return Integer.parseInt(new String(token.value()));
+    public double calculate() {
+        return Double.parseDouble(token.value());
     }
 }

@@ -7,7 +7,7 @@ let y: Double
 
 number = 2
 a = number
-b = 10 * a + 10 _ number / 4
+b = 10 * a + 10 - number / 4
 c = a - -b
 
 // пу-пу-пу

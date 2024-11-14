@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import interpreter.ast.AbstractSyntaxTree;
 import interpreter.ast.Assign;
@@ -34,10 +32,11 @@ import interpreter.ast.Variable;
 
 public class Interpreter {
 
-    private Lexer lexer = new Lexer();
+    private final Lexer lexer = new Lexer();
     private Token currentToken;
 
-    public static HashMap<String, Integer> SYMBOL_TABLE = new HashMap<>();
+    public static Set<Variable> VARIABLES = new HashSet<>();
+    public static HashMap<String, Double> SYMBOL_TABLE = new HashMap<>();
 
     public AbstractSyntaxTree interpret(String expression) {
         lexer.initialize(expression);
@@ -76,14 +75,17 @@ public class Interpreter {
 
     private AbstractSyntaxTree statement() {
         if (currentToken.type() == Token.Type.LET || currentToken.type() == Token.Type.VAR) {
-            var statement = assignStatement();
-            return statement;
+            return declareStatement();
+        } else if (currentToken.type() == Token.Type.ID) {
+            return assignStatement();
         } else {
             throw new IllegalStateException("Выражение должно начинаться с var или let");
         }
     }
 
-    private AbstractSyntaxTree assignStatement() {
+    private AbstractSyntaxTree declareStatement() {
+        Token valueTypeToken = null;
+
         var type = currentToken;
         currentToken = lexer.readNextToken();
 
@@ -92,7 +94,63 @@ public class Interpreter {
                     "Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной.");
         }
 
-        var variableName = new Variable(type, currentToken);
+        Token variableName = currentToken;
+
+        currentToken = lexer.readNextToken();
+
+        if (currentToken.type() == Token.Type.COLON) {
+            currentToken = lexer.readNextToken();
+
+            if (currentToken.type() != Token.Type.INT_TYPE && currentToken.type() != Token.Type.DOUBLE_TYPE) {
+                valueTypeToken = currentToken;
+            } else {
+                throw new IllegalStateException(
+                        "Некорректный токен: " + currentToken.type() + " Ожидался тип перемееной.");
+            }
+
+            currentToken = lexer.readNextToken();
+        }
+
+        var variable = new Variable(type, valueTypeToken, variableName);
+
+        VARIABLES.add(variable);
+
+        if (currentToken == Token.NEW_LINE) {
+            return variable;
+        }
+
+        if (currentToken.type() != Token.Type.ASSIGN) {
+            throw new IllegalStateException(
+                    "Некорректный токен: " + currentToken.type() + " Ожидался оператор присваивания.");
+        }
+
+        var assignToken = currentToken;
+        currentToken = lexer.readNextToken();
+
+        return new Assign(variable, assignToken, expr());
+    }
+
+    private AbstractSyntaxTree assignStatement() {
+
+        if (currentToken.type() != Token.Type.ID) {
+            throw new IllegalStateException(
+                    "Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной.");
+        }
+
+        Variable variable = null;
+
+        for (Variable v: VARIABLES) {
+            if (v.value().equals(currentToken)) {
+                variable = v;
+                break;
+            }
+        }
+
+        if (variable == null) {
+            throw new IllegalStateException(
+                    "Используется необъявленная переменная: " + currentToken.value());
+        }
+
         currentToken = lexer.readNextToken();
 
         if (currentToken.type() != Token.Type.ASSIGN) {
@@ -103,7 +161,7 @@ public class Interpreter {
         var assignToken = currentToken;
         currentToken = lexer.readNextToken();
 
-        return new Assign(variableName, assignToken, expr());
+        return new Assign(variable, assignToken, expr());
     }
 
     private AbstractSyntaxTree expr() {
@@ -134,13 +192,16 @@ public class Interpreter {
         if (currentToken.isSumOrSub()) {
             var op = currentToken;
             currentToken = lexer.readNextToken();
-            var node = new UnaryOperation(op, factor());
-            return node;
+            return new UnaryOperation(op, factor());
         } else if (currentToken.type() == Token.Type.INTEGER) {
             var node = new Number(currentToken);
             currentToken = lexer.readNextToken();
             return node;
-        } else if (currentToken.type() == Token.Type.LPAREN) {
+        } else if (currentToken.type() == Token.Type.DOUBLE) {
+            var node = new Number(currentToken);
+            currentToken = lexer.readNextToken();
+            return node;
+        }else if (currentToken.type() == Token.Type.LPAREN) {
             currentToken = lexer.readNextToken();
             var node = expr();
             currentToken = lexer.readNextToken();
@@ -148,7 +209,7 @@ public class Interpreter {
         } else if (currentToken.type() == Token.Type.ID) {
             // небольшой хак, в rvalue все переменные пока что let, так как они там не
             // изменяются
-            var node = new Variable(new Token(Token.Type.LET, "let"), currentToken);
+            var node = new Variable(new Token(Token.Type.LET, "let"), null, currentToken);
             currentToken = lexer.readNextToken();
             return node;
         }

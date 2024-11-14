@@ -8,15 +8,13 @@ public record UnaryOperation(
 ) implements AbstractSyntaxTree {
 
     @Override
-    public int calculate() {
-        switch (opToken.type()) {
-            case PLUS:
-                return right.calculate();
-            case MINUS:
-                return -right.calculate();
-            default:
-                throw new IllegalStateException(String.format("Неизвестная унарная операция при вычислении", opToken.type()));
-        }
+    public double calculate() {
+        return switch (opToken.type()) {
+            case PLUS -> right.calculate();
+            case MINUS -> -right.calculate();
+            default ->
+                    throw new IllegalStateException(String.format("Неизвестная унарная операция при вычислении", opToken.type()));
+        };
     }
     
 }

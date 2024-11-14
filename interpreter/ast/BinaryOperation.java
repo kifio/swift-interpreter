@@ -8,18 +8,14 @@ public record BinaryOperation(
     AbstractSyntaxTree right
 ) implements AbstractSyntaxTree {
     @Override
-    public int calculate() {
-        switch (opToken.type()) {
-            case PLUS:
-                return left.calculate() + right.calculate();
-            case MINUS:
-                return left.calculate() - right.calculate();
-            case MUL:
-                return left.calculate() * right.calculate();
-            case DIV:
-                return left.calculate() / right.calculate();
-            default:
-                throw new IllegalStateException(String.format("Неизвестная операция при вычислении", opToken.type()));
-        }
+    public double calculate() {
+        return switch (opToken.type()) {
+            case PLUS -> left.calculate() + right.calculate();
+            case MINUS -> left.calculate() - right.calculate();
+            case MUL -> left.calculate() * right.calculate();
+            case DIV -> left.calculate() / right.calculate();
+            default ->
+                    throw new IllegalStateException(String.format("Неизвестная операция при вычислении", opToken.type()));
+        };
     }
 }

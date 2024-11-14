@@ -24,13 +24,14 @@ class Lexer {
 
     Token readNextToken() {
         skipWhiteSpace();
+        skipComment();
 
         if (pos > text.length - 1) {
             return new Token(Token.Type.EOF, null);
         }
-        
+
         if (Character.isDigit(text[pos])) {
-            return readInteger(text[pos]);
+            return readNumber(text[pos]);
         } else if (isPartOfWord(text[pos])) {
             return readWord(text[pos]);
         } else {
@@ -38,9 +39,27 @@ class Lexer {
         }
     }
 
-    // Возвращает следующий символ не увеличивая позицию обрабатываемого символа
     private void skipComment() {
         // Если прочитал // или /*, то обрабатывать комментарий соотв. образом
+        if (text[pos] != '/') {
+            return;
+        }
+
+        pos++;
+
+        if (text[pos] == '/') {
+            do {
+                pos++;
+            } while (text[pos] != '\n' && pos <= text.length - 1);
+
+        } else if (text[pos] == '*') {
+            do {
+                pos++;
+            } while (text[pos] != '*' && text[pos + 1] != '/' && pos <= text.length - 1);
+            pos += 2;
+        } else {
+            pos--;
+        }
     }
 
     private void skipWhiteSpace() {
@@ -78,13 +97,23 @@ class Lexer {
         }
     }
 
-    private Token readInteger(char currentChar) {
+    private Token readNumber(char currentChar) {
         var digitCharacters = new ArrayList<Character>();
         digitCharacters.add(currentChar);
         pos += 1;
 
-        while (pos <= text.length - 1 && Character.isDigit(text[pos])) {
+        Token.Type type = Token.Type.INTEGER;
+
+        while (pos <= text.length - 1 && (Character.isDigit(text[pos]) || text[pos] == '.')) {
             digitCharacters.add(text[pos]);
+            if (text[pos] == '.') {
+                type = Token.Type.DOUBLE;
+                pos += 1;
+                while (pos <= text.length - 1 && Character.isDigit(text[pos])) {
+                    digitCharacters.add(text[pos]);
+                    pos += 1;
+                }
+            }
             pos += 1;
         }
 
@@ -95,13 +124,13 @@ class Lexer {
         }
 
         return new Token(
-            Token.Type.INTEGER, 
-            new String(arr)
+                type,
+                new String(arr)
         );
     }
 
     private Token readSign(char currentChar) {
-        Token.Type type = null;
+        Token.Type type;
 
         switch (currentChar) {
             case '+':
@@ -126,11 +155,14 @@ class Lexer {
                 type = Token.Type.ASSIGN;
                 break;
             case '\n':  // Есть опасения, что в Windows не заработает тк там \t\n.
-                type = Token.Type.NEW_LINE;
-                break;
+                pos += 1;
+                return Token.NEW_LINE;
             case ';':
-                type = Token.Type.SEMI;
-                break;
+                pos += 1;
+                return Token.SEMI;
+            case ':':
+                pos += 1;
+                return Token.COLON;
             default:
                 throw new IllegalStateException(String.format("Неподдерживаемый символ %s позиция %d", currentChar, pos));
         }
@@ -138,8 +170,8 @@ class Lexer {
         pos += 1;
 
         return new Token(
-            type, 
-            new String(new char[]{ currentChar })
+                type,
+                String.valueOf(currentChar)
         );
     }
 

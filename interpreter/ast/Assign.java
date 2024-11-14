@@ -10,7 +10,7 @@ public record Assign(
     ) implements AbstractSyntaxTree {
 
     @Override
-    public int calculate() {
+    public double calculate() {
         if (left instanceof Variable) {
             Interpreter.SYMBOL_TABLE.put(((Variable) left).value().value(), right.calculate());
             System.out.println(((Variable) left).value() + " = " + right.calculate());
