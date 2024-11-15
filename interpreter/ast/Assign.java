@@ -12,7 +12,19 @@ public record Assign(
     @Override
     public double calculate() {
         if (left instanceof Variable) {
-            Interpreter.SYMBOL_TABLE.put(((Variable) left).value().value(), right.calculate());
+            Variable variable = (Variable) left;
+            if (variable.type().type() == Token.Type.LET && Interpreter.SYMBOL_TABLE.containsKey(variable.value().value())) {
+                throw new IllegalStateException("Невозможно изменить значение let константы");
+            }
+
+            double rValue = right.calculate();
+            Token valueType = variable.valueType();
+
+            if (valueType != null && valueType.type() == Token.Type.INT_TYPE) {
+                rValue = (int) rValue;
+            }
+
+            Interpreter.SYMBOL_TABLE.put(variable.value().value(), rValue);
             System.out.println(((Variable) left).value() + " = " + right.calculate());
             return 0;
         } else {

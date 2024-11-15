@@ -1,13 +1,13 @@
-let number: Int
-var a: Int
+let number: Int = -4
+var a = -4
 var b: Int
 var c: Int
 var x: Int
 let y: Double
 
-number = 2
-a = number
-b = 10 * a + 10 - number / 4
+// number = 2
+// a = number
+b = 10 * a + 10 * number / 4
 c = a - -b
 
 // пу-пу-пу

@@ -41,7 +41,7 @@ class Lexer {
 
     private void skipComment() {
         // Если прочитал // или /*, то обрабатывать комментарий соотв. образом
-        if (text[pos] != '/') {
+        if (pos > text.length - 1 || text[pos] != '/') {
             return;
         }
 
