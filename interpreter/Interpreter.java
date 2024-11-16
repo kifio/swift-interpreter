@@ -4,7 +4,7 @@ package interpreter;
  * compound_statement : statement_list
  * statement_list : statement | statement (SEMI | NEW_LINE) statement_list
  * statement : compound_statement | assignment_statement | empty
- * assignment_statement : (LET | VAR) variable ASSIGN expr
+ * assignment_statement : ((LET | VAR) | empty) variable (COLON (INT | DOUBLE) | empty) ASSIGN expr
  * empty :
  * expr: term ((PLUS | MINUS) term)*
  * term: factor ((MUL | DIV) factor)*
