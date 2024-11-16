@@ -94,10 +94,6 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree statement() {
-//        if (currentToken.type() == Token.Type.LET || currentToken.type() == Token.Type.VAR) {
-//            return declareStatement();
-//        }
-
         return assignStatement(variable());
     }
 
