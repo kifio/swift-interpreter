@@ -54,7 +54,7 @@ class Lexer {
         } else if (text[pos] == '*') {
             do {
                 pos++;
-            } while (text[pos] != '*' && text[pos + 1] != '/' && pos <= text.length - 1);
+            } while (!(text[pos] == '*' && text[pos + 1] == '/') && pos <= text.length - 1);
             pos += 2;
         } else {
             pos--;

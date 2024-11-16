@@ -74,7 +74,6 @@ public class Interpreter {
 
     private List<AbstractSyntaxTree> statementList() {
         var statements = new ArrayList<AbstractSyntaxTree>();
-        statements.add(statement());
 
         while (currentToken.equals(Token.NEW_LINE) || currentToken.equals(Token.SEMI)) {
             currentToken = lexer.readNextToken();
