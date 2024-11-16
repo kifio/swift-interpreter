@@ -11,6 +11,12 @@ public class Interpreter {
     private Token currentToken;
     private char[] text;
 
+    public static void main(String[] args) {
+        // String expression = args[1];
+        Interpreter interpreter = new Interpreter();
+        System.out.println(interpreter.expr("13*4"));
+    }
+
     private void readNextToken() {
         skipWhiteSpace();
 
@@ -18,7 +24,7 @@ public class Interpreter {
             currentToken = new Token(Token.Type.EOF, null);
             return;
         }
-        
+
         if (Character.isDigit(text[pos])) {
             readInteger(text[pos]);
         } else {
@@ -49,8 +55,8 @@ public class Interpreter {
         }
 
         currentToken = new Token(
-            Token.Type.INTEGER, 
-            arr
+                Token.Type.INTEGER,
+                arr
         );
     }
 
@@ -75,8 +81,8 @@ public class Interpreter {
         }
 
         currentToken = new Token(
-            type, 
-            new char[]{ currentChar }
+                type,
+                new char[]{currentChar}
         );
 
         pos += 1;
@@ -84,10 +90,10 @@ public class Interpreter {
 
     private void eat(Token.Type type) {
         if (currentToken.type() == type) {
-            readNextToken(); 
+            readNextToken();
         } else {
             throw new IllegalStateException(
-                String.format("Ожидаемый токен %s, но на самом деле %s", type.name(), currentToken.type())
+                    String.format("Ожидаемый токен %s, но на самом деле %s", type.name(), currentToken.type())
             );
         }
     }
@@ -98,7 +104,7 @@ public class Interpreter {
         eat(Token.Type.INTEGER);
         return Integer.parseInt(new String(value));
     }
-    
+
     public int expr(String expression) {
 
         text = expression.toCharArray();
@@ -122,11 +128,5 @@ public class Interpreter {
         }
 
         return result;
-    }
-    
-    public static void main(String[] args) {
-        // String expression = args[1];
-        Interpreter interpreter = new Interpreter();
-        System.out.println(interpreter.expr("13*4"));
     }
 }

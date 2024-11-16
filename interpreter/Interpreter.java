@@ -16,27 +16,47 @@ package interpreter;
  * variable: ID
  */
 
+import interpreter.ast.Number;
+import interpreter.ast.*;
+
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-
-import interpreter.ast.AbstractSyntaxTree;
-import interpreter.ast.Assign;
-import interpreter.ast.BinaryOperation;
-import interpreter.ast.Compound;
-import interpreter.ast.Number;
-import interpreter.ast.UnaryOperation;
-import interpreter.ast.Variable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class Interpreter {
 
+    public static List<Variable> VARIABLES = new ArrayList<>();
+    public static List<Constant> CONSTANTS = new ArrayList<>();
+    public static HashMap<String, Double> SYMBOL_TABLE = new HashMap<>();
     private final Lexer lexer = new Lexer();
     private Token currentToken;
 
-    public static Set<Variable> VARIABLES = new HashSet<>();
-    public static HashMap<String, Double> SYMBOL_TABLE = new HashMap<>();
+    public static void main(String[] args) {
+        try {
+            Path contents = FileSystems
+                    .getDefault()
+                    .getPath("")
+                    .resolve("interpreter")
+                    .resolve("Contents.swift");
+
+            StringBuilder sb = new StringBuilder();
+            List<String> lines = Files.readAllLines(contents);
+
+            for (String line : lines) {
+                sb.append(line);
+                sb.append('\n');
+            }
+
+            var ast = new Interpreter().interpret(sb.toString().trim());
+            System.out.println(ast.calculate());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public AbstractSyntaxTree interpret(String expression) {
         lexer.initialize(expression);
@@ -74,84 +94,114 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree statement() {
+//        if (currentToken.type() == Token.Type.LET || currentToken.type() == Token.Type.VAR) {
+//            return declareStatement();
+//        }
+
+        return assignStatement(variable());
+    }
+
+    private AbstractSyntaxTree variable() {
         if (currentToken.type() == Token.Type.LET || currentToken.type() == Token.Type.VAR) {
-            return declareStatement();
-        } else if (currentToken.type() == Token.Type.ID) {
-            return assignStatement();
+            Token.Type idType = currentToken.type();
+
+            currentToken = lexer.readNextToken();
+
+            if (currentToken.type() != Token.Type.ID) {
+                throw new IllegalStateException(
+                        "Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной."
+                );
+            }
+
+            Token name = currentToken;
+
+            if (idExist(name, VARIABLES) || idExist(name, CONSTANTS)) {
+                throw new IllegalStateException(
+                        "Идентификатор " + currentToken.value() + " уже объявлен."
+                );
+            }
+
+            Token type = null;
+            currentToken = lexer.readNextToken();
+
+            if (currentToken.type() == Token.Type.COLON) {
+                currentToken = lexer.readNextToken();
+
+                if (currentToken.type() != Token.Type.INT_TYPE && currentToken.type() != Token.Type.DOUBLE_TYPE) {
+                    type = currentToken;
+                } else {
+                    throw new IllegalStateException(
+                            "Некорректный токен: " + currentToken.type() + " Ожидался тип переменной.");
+                }
+
+                currentToken = lexer.readNextToken();
+            }
+
+            if (idType == Token.Type.LET) {
+                Constant constant = new Constant(type, name);
+                CONSTANTS.add(constant);
+                return constant;
+            } else /* if (idType == Token.Type.VAR) */ {
+                Variable variable = new Variable(type, name);
+                VARIABLES.add(variable);
+                return variable;
+            }
+        }
+
+        AbstractSyntaxTree id = idAST(currentToken, VARIABLES);
+
+        if (id != null) {
+            currentToken = lexer.readNextToken();
+            return id;
+        }
+
+        id = idAST(currentToken, CONSTANTS);
+
+        if (id != null) {
+            Constant constant = (Constant) id;
+            if (!SYMBOL_TABLE.containsKey(constant.value().value())) {
+                currentToken = lexer.readNextToken();
+                return id;
+            }
+
+            throw new IllegalStateException(
+                    "Нельзя переопределить константу: " + constant.value().value()
+            );
         } else {
-            throw new IllegalStateException("Выражение должно начинаться с var или let");
+            throw new IllegalStateException(
+                    "Некорректный токен: " + currentToken.value()
+            );
         }
     }
 
-    private AbstractSyntaxTree declareStatement() {
-        Token valueTypeToken = null;
-
-        var type = currentToken;
-        currentToken = lexer.readNextToken();
-
-        if (currentToken.type() != Token.Type.ID) {
-            throw new IllegalStateException(
-                    "Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной.");
-        }
-
-        Token variableName = currentToken;
-
-        currentToken = lexer.readNextToken();
-
-        if (currentToken.type() == Token.Type.COLON) {
-            currentToken = lexer.readNextToken();
-
-            if (currentToken.type() != Token.Type.INT_TYPE && currentToken.type() != Token.Type.DOUBLE_TYPE) {
-                valueTypeToken = currentToken;
-            } else {
-                throw new IllegalStateException(
-                        "Некорректный токен: " + currentToken.type() + " Ожидался тип перемееной.");
+    private boolean idExist(Token t, List<? extends AbstractSyntaxTree> ids) {
+        for (AbstractSyntaxTree id : ids) {
+            if (id instanceof Variable && ((Variable) id).value() == t) {
+                return true;
+            } else if (id instanceof Constant && ((Constant) id).value() == t) {
+                return true;
             }
-
-            currentToken = lexer.readNextToken();
         }
 
-        var variable = new Variable(type, valueTypeToken, variableName);
+        return false;
+    }
 
-        VARIABLES.add(variable);
+    private AbstractSyntaxTree idAST(Token t, List<? extends AbstractSyntaxTree> ids) {
+        for (AbstractSyntaxTree id : ids) {
+            if (id instanceof Variable && ((Variable) id).value() == t) {
+                return id;
+            } else if (id instanceof Constant && ((Constant) id).value() == t) {
+                return id;
+            }
+        }
+        return null;
+    }
+
+    private AbstractSyntaxTree assignStatement(AbstractSyntaxTree variable) {
 
         if (currentToken == Token.NEW_LINE) {
             return variable;
         }
-
-        if (currentToken.type() != Token.Type.ASSIGN) {
-            throw new IllegalStateException(
-                    "Некорректный токен: " + currentToken.type() + " Ожидался оператор присваивания.");
-        }
-
-        var assignToken = currentToken;
-        currentToken = lexer.readNextToken();
-
-        return new Assign(variable, assignToken, expr());
-    }
-
-    private AbstractSyntaxTree assignStatement() {
-
-        if (currentToken.type() != Token.Type.ID) {
-            throw new IllegalStateException(
-                    "Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной.");
-        }
-
-        Variable variable = null;
-
-        for (Variable v: VARIABLES) {
-            if (v.value().equals(currentToken)) {
-                variable = v;
-                break;
-            }
-        }
-
-        if (variable == null) {
-            throw new IllegalStateException(
-                    "Используется необъявленная переменная: " + currentToken.value());
-        }
-
-        currentToken = lexer.readNextToken();
 
         if (currentToken.type() != Token.Type.ASSIGN) {
             throw new IllegalStateException(
@@ -201,7 +251,7 @@ public class Interpreter {
             var node = new Number(currentToken);
             currentToken = lexer.readNextToken();
             return node;
-        }else if (currentToken.type() == Token.Type.LPAREN) {
+        } else if (currentToken.type() == Token.Type.LPAREN) {
             currentToken = lexer.readNextToken();
             var node = expr();
             currentToken = lexer.readNextToken();
@@ -209,35 +259,12 @@ public class Interpreter {
         } else if (currentToken.type() == Token.Type.ID) {
             // небольшой хак, в rvalue все переменные пока что let, так как они там не
             // изменяются
-            var node = new Variable(new Token(Token.Type.LET, "let"), null, currentToken);
+            var node = new Constant(null, currentToken);
             currentToken = lexer.readNextToken();
             return node;
         }
 
         throw new IllegalStateException(
                 String.format("Не удалось получить значение оператора. Обрабатываемый токен: %s", currentToken.type()));
-    }
-
-    public static void main(String[] args) {
-        try {
-            Path contents = FileSystems
-                    .getDefault()
-                    .getPath("")
-                    .resolve("interpreter")
-                    .resolve("Contents.swift");
-
-            StringBuilder sb = new StringBuilder();
-            List<String> lines = Files.readAllLines(contents);
-
-            for (String line : lines) {
-                sb.append(line);
-                sb.append('\n');
-            }
-
-            var ast = new Interpreter().interpret(sb.toString().trim());
-            System.out.println(ast.calculate());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

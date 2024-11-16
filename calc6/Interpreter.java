@@ -13,6 +13,9 @@ public class Interpreter {
     private Lexer lexer = new Lexer();
     private Token currentToken;
 
+    public static void main(String[] args) {
+    }
+
     public AbstractSyntaxTree interpret(String expression) {
         lexer.initialize(expression);
         currentToken = lexer.readNextToken();
@@ -30,7 +33,7 @@ public class Interpreter {
 
         return left;
     }
-    
+
     private AbstractSyntaxTree term() {
         var left = factor();
 
@@ -42,11 +45,11 @@ public class Interpreter {
 
         return left;
     }
-    
+
     private AbstractSyntaxTree factor() {
         if (currentToken.type() == Token.Type.INTEGER) {
             var node = new Number(currentToken);
-            currentToken = lexer.readNextToken(); 
+            currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.LPAREN) {
             currentToken = lexer.readNextToken();
@@ -56,9 +59,7 @@ public class Interpreter {
         }
 
         throw new IllegalStateException(
-            String.format("Не удалось получить значение оператора. Обрабатываемый токен: %s", currentToken.type())
+                String.format("Не удалось получить значение оператора. Обрабатываемый токен: %s", currentToken.type())
         );
     }
-    
-    public static void main(String[] args) {}
 }

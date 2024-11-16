@@ -18,7 +18,7 @@ class Lexer {
         if (pos > text.length - 1) {
             return new Token(Token.Type.EOF, null);
         }
-        
+
         if (Character.isDigit(text[pos])) {
             return readInteger(text[pos]);
         } else {
@@ -49,8 +49,8 @@ class Lexer {
         }
 
         return new Token(
-            Token.Type.INTEGER, 
-            arr
+                Token.Type.INTEGER,
+                arr
         );
     }
 
@@ -83,8 +83,8 @@ class Lexer {
         pos += 1;
 
         return new Token(
-            type, 
-            new char[]{ currentChar }
+                type,
+                new char[]{currentChar}
         );
     }
 }

@@ -3,8 +3,8 @@ package interpreter.ast;
 import interpreter.Token;
 
 public record UnaryOperation(
-    Token opToken,
-    AbstractSyntaxTree right
+        Token opToken,
+        AbstractSyntaxTree right
 ) implements AbstractSyntaxTree {
 
     @Override
@@ -16,5 +16,5 @@ public record UnaryOperation(
                     throw new IllegalStateException(String.format("Неизвестная унарная операция при вычислении", opToken.type()));
         };
     }
-    
+
 }

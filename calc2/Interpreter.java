@@ -11,6 +11,12 @@ public class Interpreter {
     private Token currentToken;
     private char[] text;
 
+    public static void main(String[] args) {
+        // String expression = args[1];
+        Interpreter interpreter = new Interpreter();
+        System.out.println(interpreter.expr("13*4"));
+    }
+
     private void readNextToken() {
         skipWhiteSpace();
 
@@ -18,7 +24,7 @@ public class Interpreter {
             currentToken = new Token(calc2.Token.Type.EOF, null);
             return;
         }
-        
+
         if (Character.isDigit(text[pos])) {
             readInteger(text[pos]);
         } else {
@@ -49,8 +55,8 @@ public class Interpreter {
         }
 
         currentToken = new Token(
-            calc2.Token.Type.INTEGER, 
-            arr
+                calc2.Token.Type.INTEGER,
+                arr
         );
     }
 
@@ -75,8 +81,8 @@ public class Interpreter {
         }
 
         currentToken = new Token(
-            type, 
-            new char[]{ currentChar }
+                type,
+                new char[]{currentChar}
         );
 
         pos += 1;
@@ -84,14 +90,14 @@ public class Interpreter {
 
     private void eat(Token.Type type) {
         if (currentToken.type() == type) {
-            readNextToken(); 
+            readNextToken();
         } else {
             throw new IllegalStateException(
-                String.format("Ожидаемый токен %s, но на самом деле %s", type.name(), currentToken.type())
+                    String.format("Ожидаемый токен %s, но на самом деле %s", type.name(), currentToken.type())
             );
         }
     }
-    
+
     public int expr(String expression) {
 
         text = expression.toCharArray();
@@ -104,49 +110,43 @@ public class Interpreter {
         eat(Token.Type.INTEGER);
 
         var leftValue = Integer.parseInt(
-            new String(left.value())
+                new String(left.value())
         );
 
         do {
             var op = currentToken;
-        
+
             if (validOperation(op.type())) {
                 eat(op.type());
             }
-            
+
             var right = currentToken;
             eat(Token.Type.INTEGER);
-    
+
             var rightValue = Integer.parseInt(
-                new String(right.value())
+                    new String(right.value())
             );
-    
+
             if (op.type() == Token.Type.PLUS) {
-                leftValue += rightValue; 
+                leftValue += rightValue;
             } else if (op.type() == Token.Type.MINUS) {
-                leftValue -= rightValue; 
+                leftValue -= rightValue;
             } else if (op.type() == Token.Type.MUL) {
-                leftValue *= rightValue; 
+                leftValue *= rightValue;
             } else if (op.type() == Token.Type.DIV) {
-                leftValue /= rightValue; 
+                leftValue /= rightValue;
             } else {
                 throw new IllegalStateException("Неподдерживаемый оператор" + op.type());
             }
-        } while (currentToken.type() !=  Token.Type.EOF);
+        } while (currentToken.type() != Token.Type.EOF);
 
         return leftValue;
     }
 
     private boolean validOperation(Token.Type type) {
-        return type == Token.Type.PLUS 
-        || type == Token.Type.MINUS
-        || type == Token.Type.MUL
-        || type == Token.Type.DIV;
-    }
-    
-    public static void main(String[] args) {
-        // String expression = args[1];
-        Interpreter interpreter = new Interpreter();
-        System.out.println(interpreter.expr("13*4"));
+        return type == Token.Type.PLUS
+                || type == Token.Type.MINUS
+                || type == Token.Type.MUL
+                || type == Token.Type.DIV;
     }
 }

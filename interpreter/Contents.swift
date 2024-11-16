@@ -1,7 +1,7 @@
 let number: Int = -4
 var a = -4
 var b: Int
-var c: Int
+var c: Int = a + number
 var x: Int
 let y: Double
 

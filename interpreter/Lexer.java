@@ -5,11 +5,10 @@ import java.util.HashMap;
 
 class Lexer {
 
-    private int pos;
-    private char[] text;
-
     private final HashMap<String, Token> variables = new HashMap<>();
     private final HashMap<String, Token> keyWords = new HashMap<>();
+    private int pos;
+    private char[] text;
 
     {
         keyWords.put(KeyWord.LET, new Token(Token.Type.LET, KeyWord.LET));

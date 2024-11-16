@@ -10,6 +10,12 @@ public class Interpreter {
     private Token currentToken;
     private char[] text;
 
+    public static void main(String[] args) {
+        // String expression = args[1];
+        Interpreter interpreter = new Interpreter();
+        System.out.println(interpreter.expr(" 1  + 1 "));
+    }
+
     private void readNextToken() {
         skipWhiteSpace();
 
@@ -17,7 +23,7 @@ public class Interpreter {
             currentToken = new Token(calc.Token.Type.EOF, null);
             return;
         }
-        
+
         if (Character.isDigit(text[pos])) {
             readInteger(text[pos]);
         } else {
@@ -48,8 +54,8 @@ public class Interpreter {
         }
 
         currentToken = new Token(
-            calc.Token.Type.INTEGER, 
-            arr
+                calc.Token.Type.INTEGER,
+                arr
         );
     }
 
@@ -68,8 +74,8 @@ public class Interpreter {
         }
 
         currentToken = new Token(
-            type, 
-            new char[]{ currentChar }
+                type,
+                new char[]{currentChar}
         );
 
         pos += 1;
@@ -77,14 +83,14 @@ public class Interpreter {
 
     private void eat(Token.Type type) {
         if (currentToken.type() == type) {
-            readNextToken(); 
+            readNextToken();
         } else {
             throw new IllegalStateException(
-                String.format("Ожидаемый токен %s, но на самом деле %s", type.name(), currentToken.type())
+                    String.format("Ожидаемый токен %s, но на самом деле %s", type.name(), currentToken.type())
             );
         }
     }
-    
+
     public int expr(String expression) {
 
         text = expression.toCharArray();
@@ -97,34 +103,28 @@ public class Interpreter {
         eat(Token.Type.INTEGER);
 
         var leftValue = Integer.parseInt(
-            new String(left.value())
+                new String(left.value())
         );
 
         var op = currentToken;
-        
+
         if (op.type() == Token.Type.PLUS || op.type() == Token.Type.MINUS) {
             eat(op.type());
         }
-        
+
         var right = currentToken;
         eat(Token.Type.INTEGER);
 
         var rightValue = Integer.parseInt(
-            new String(right.value())
+                new String(right.value())
         );
 
         if (op.type() == Token.Type.PLUS) {
-            return leftValue + rightValue; 
+            return leftValue + rightValue;
         } else if (op.type() == Token.Type.MINUS) {
-            return leftValue - rightValue; 
+            return leftValue - rightValue;
         } else {
             throw new IllegalStateException("Неподдерживаемый оператор" + op.type());
         }
-    }
-    
-    public static void main(String[] args) {
-        // String expression = args[1];
-        Interpreter interpreter = new Interpreter();
-        System.out.println(interpreter.expr(" 1  + 1 "));
     }
 }

@@ -1,9 +1,9 @@
 package calc6;
 
 public record BinaryOperation(
-    AbstractSyntaxTree left,
-    Token opToken,
-    AbstractSyntaxTree right
+        AbstractSyntaxTree left,
+        Token opToken,
+        AbstractSyntaxTree right
 ) implements AbstractSyntaxTree {
     @Override
     public int calculate() {

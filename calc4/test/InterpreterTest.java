@@ -1,10 +1,9 @@
 package calc4.test;
 
-import static org.junit.Assert.assertEquals;
-
+import calc4.Interpreter;
 import org.junit.Test;
 
-import calc4.Interpreter;
+import static org.junit.Assert.assertEquals;
 
 public class InterpreterTest {
 

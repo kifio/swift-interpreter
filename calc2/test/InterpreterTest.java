@@ -1,11 +1,10 @@
 package calc2.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-
+import calc2.Interpreter;
 import org.junit.Test;
 
-import calc2.Interpreter;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class InterpreterTest {
 
@@ -69,18 +68,32 @@ public class InterpreterTest {
         assertEquals(2, interpreter.expr(" 1  + 1 "));
         assertEquals(1, interpreter.expr("0   +1"));
         assertEquals(10, interpreter.expr("9+   1"));
-        assertEquals(10, interpreter.expr("9   +   1")); 
+        assertEquals(10, interpreter.expr("9   +   1"));
     }
 
     @Test
     public void testBadInput() {
         Interpreter interpreter = new Interpreter();
-        assertThrows(IllegalStateException.class, () -> { interpreter.expr(""); });
-        assertThrows(IllegalStateException.class, () -> { interpreter.expr("   "); });
-        assertThrows(IllegalStateException.class, () -> { interpreter.expr("0"); });
-        assertThrows(IllegalStateException.class, () -> { interpreter.expr("1000"); });
-        assertThrows(IllegalStateException.class, () -> { interpreter.expr("+"); });
-        assertThrows(IllegalStateException.class, () -> { interpreter.expr("9 + 1 - 1 - - 9"); });
-        assertThrows(ArithmeticException.class, () -> { interpreter.expr("9/0"); });
+        assertThrows(IllegalStateException.class, () -> {
+            interpreter.expr("");
+        });
+        assertThrows(IllegalStateException.class, () -> {
+            interpreter.expr("   ");
+        });
+        assertThrows(IllegalStateException.class, () -> {
+            interpreter.expr("0");
+        });
+        assertThrows(IllegalStateException.class, () -> {
+            interpreter.expr("1000");
+        });
+        assertThrows(IllegalStateException.class, () -> {
+            interpreter.expr("+");
+        });
+        assertThrows(IllegalStateException.class, () -> {
+            interpreter.expr("9 + 1 - 1 - - 9");
+        });
+        assertThrows(ArithmeticException.class, () -> {
+            interpreter.expr("9/0");
+        });
     }
 }

@@ -1,8 +1,8 @@
 package calc7;
 
 record UnaryOperation(
-    Token opToken,
-    AbstractSyntaxTree right
+        Token opToken,
+        AbstractSyntaxTree right
 ) implements AbstractSyntaxTree {
 
     @Override
@@ -16,5 +16,5 @@ record UnaryOperation(
                 throw new IllegalStateException(String.format("Неизвестная унарная операция при вычислении", opToken.type()));
         }
     }
-    
+
 }
