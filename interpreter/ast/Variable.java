@@ -3,7 +3,7 @@ package interpreter.ast;
 import interpreter.Interpreter;
 import interpreter.Token;
 
-public class Variable extends Identificator {
+public class Variable<T> extends Identificator {
 
     public Variable(Token type, Token value) {
         super(type, value);

@@ -1,6 +1,4 @@
 package interpreter.ast;
 
-public interface AbstractSyntaxTree {
-    double calculate();
-}
+public interface AbstractSyntaxTree {}
     

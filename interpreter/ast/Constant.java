@@ -10,8 +10,8 @@ public class Constant extends Identificator {
     }
 
     @Override
-    public double calculate() {
+    public void calculate() {
+        this.update();
         return Interpreter.SYMBOL_TABLE.getOrDefault(this.value().value(), 0.0);
     }
-
 }

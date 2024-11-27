@@ -20,7 +20,6 @@ public record Token(Type type, String value) {
         ASSIGN,
         NEW_LINE, SEMI, COLON,
         INTEGER, DOUBLE,
-        INT_TYPE, DOUBLE_TYPE,
         PLUS, MINUS, MUL, DIV,
         LPAREN, RPAREN,
         COMMENT,
