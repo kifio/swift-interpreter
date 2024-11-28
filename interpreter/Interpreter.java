@@ -29,9 +29,11 @@ import java.util.List;
 
 public class Interpreter {
 
-    public static List<Variable> VARIABLES = new ArrayList<>();
-    public static List<Constant> CONSTANTS = new ArrayList<>();
-    public static HashMap<String, Double> SYMBOL_TABLE = new HashMap<>();
+//    public static List<Variable> VARIABLES = new ArrayList<>();
+//    public static List<Constant> CONSTANTS = new ArrayList<>();
+
+    private static HashMap<String, Identificator> SYMBOL_TABLE = new HashMap<>();
+
     private final Lexer lexer = new Lexer();
     private Token currentToken;
 
@@ -51,8 +53,7 @@ public class Interpreter {
                 sb.append('\n');
             }
 
-            var ast = new Interpreter().interpret(sb.toString().trim());
-            System.out.println(ast.calculate());
+            new ASTVisitor().visitAST(new Interpreter().interpret(sb.toString().trim()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -97,8 +98,8 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree variable() {
-        if (currentToken.type() == Token.Type.LET || currentToken.type() == Token.Type.VAR) {
-            Token.Type idType = currentToken.type();
+        if (currentToken == Token.LET || currentToken == Token.VAR) {
+            Token idType = currentToken;
 
             currentToken = lexer.readNextToken();
 
@@ -110,20 +111,20 @@ public class Interpreter {
 
             Token name = currentToken;
 
-            if (idExist(name, VARIABLES) || idExist(name, CONSTANTS)) {
+            if (idExist(name) || idExist(name)) {
                 throw new IllegalStateException(
                         "Идентификатор " + currentToken.value() + " уже объявлен."
                 );
             }
 
-            Token type = null;
+            Token valueType = null;
             currentToken = lexer.readNextToken();
 
-            if (currentToken.type() == Token.Type.COLON) {
+            if (currentToken == Token.COLON) {
                 currentToken = lexer.readNextToken();
 
-                if (currentToken.type() != Token.Type.INT_TYPE && currentToken.type() != Token.Type.DOUBLE_TYPE) {
-                    type = currentToken;
+                if (currentToken == Token.INTEGER || currentToken == Token.DOUBLE) {
+                    valueType = currentToken;
                 } else {
                     throw new IllegalStateException(
                             "Некорректный токен: " + currentToken.type() + " Ожидался тип переменной.");
@@ -132,64 +133,29 @@ public class Interpreter {
                 currentToken = lexer.readNextToken();
             }
 
-            if (idType == Token.Type.LET) {
-                Constant constant = new Constant(type, name);
-                CONSTANTS.add(constant);
-                return constant;
+            if (idType == Token.LET) {
+                return SYMBOL_TABLE.put(name.value(), new Constant(valueType));
             } else /* if (idType == Token.Type.VAR) */ {
-                Variable variable = new Variable(type, name);
-                VARIABLES.add(variable);
-                return variable;
+                return SYMBOL_TABLE.put(name.value(), new Variable(valueType));
             }
         }
 
-        AbstractSyntaxTree id = idAST(currentToken, VARIABLES);
+        AbstractSyntaxTree id = idAST(currentToken);
 
         if (id != null) {
             currentToken = lexer.readNextToken();
             return id;
         }
 
-        id = idAST(currentToken, CONSTANTS);
-
-        if (id != null) {
-            Constant constant = (Constant) id;
-            if (!SYMBOL_TABLE.containsKey(constant.value().value())) {
-                currentToken = lexer.readNextToken();
-                return id;
-            }
-
-            throw new IllegalStateException(
-                    "Нельзя переопределить константу: " + constant.value().value()
-            );
-        } else {
-            throw new IllegalStateException(
-                    "Некорректный токен: " + currentToken.value()
-            );
-        }
+        throw new IllegalStateException("Некорректный токен: " + currentToken.value());
     }
 
-    private boolean idExist(Token t, List<? extends AbstractSyntaxTree> ids) {
-        for (AbstractSyntaxTree id : ids) {
-            if (id instanceof Variable && ((Variable) id).value() == t) {
-                return true;
-            } else if (id instanceof Constant && ((Constant) id).value() == t) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean idExist(Token t) {
+        return SYMBOL_TABLE.containsKey(t.value());
     }
 
-    private AbstractSyntaxTree idAST(Token t, List<? extends AbstractSyntaxTree> ids) {
-        for (AbstractSyntaxTree id : ids) {
-            if (id instanceof Variable && ((Variable) id).value() == t) {
-                return id;
-            } else if (id instanceof Constant && ((Constant) id).value() == t) {
-                return id;
-            }
-        }
-        return null;
+    private AbstractSyntaxTree idAST(Token t) {
+        return SYMBOL_TABLE.get(t.value());
     }
 
     private AbstractSyntaxTree assignStatement(AbstractSyntaxTree variable) {
@@ -238,23 +204,21 @@ public class Interpreter {
             var op = currentToken;
             currentToken = lexer.readNextToken();
             return new UnaryOperation(op, factor());
-        } else if (currentToken.type() == Token.Type.INTEGER) {
+        } else if (currentToken == Token.INTEGER) {
             var node = new Number(currentToken);
             currentToken = lexer.readNextToken();
             return node;
-        } else if (currentToken.type() == Token.Type.DOUBLE) {
+        } else if (currentToken == Token.DOUBLE) {
             var node = new Number(currentToken);
             currentToken = lexer.readNextToken();
             return node;
-        } else if (currentToken.type() == Token.Type.LPAREN) {
+        } else if (currentToken == Token.LPAREN) {
             currentToken = lexer.readNextToken();
             var node = expr();
             currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.ID) {
-            // небольшой хак, в rvalue все переменные пока что let, так как они там не
-            // изменяются
-            var node = new Constant(null, currentToken);
+            var node = idAST(currentToken);
             currentToken = lexer.readNextToken();
             return node;
         }

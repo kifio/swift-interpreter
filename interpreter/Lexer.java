@@ -5,18 +5,18 @@ import java.util.HashMap;
 
 class Lexer {
 
-    private final HashMap<String, Token> variables = new HashMap<>();
     private final HashMap<String, Token> keyWords = new HashMap<>();
     private int pos;
     private char[] text;
 
     {
-        keyWords.put(KeyWord.LET, new Token(Token.Type.LET, KeyWord.LET));
-        keyWords.put(KeyWord.VAR, new Token(Token.Type.VAR, KeyWord.VAR));
+        keyWords.put(Token.LET.value(), Token.LET);
+        keyWords.put(Token.VAR.value(), Token.VAR);
+        keyWords.put(Token.INTEGER.value(), Token.INTEGER);
+        keyWords.put(Token.DOUBLE.value(), Token.DOUBLE);
     }
 
     void initialize(String expression) {
-        variables.clear();
         text = expression.toCharArray();
         pos = 0;
     }
@@ -87,12 +87,8 @@ class Lexer {
 
         if (keyWords.containsKey(word)) {
             return keyWords.get(word);
-        } else if (variables.containsKey(word)) {
-            return variables.get(word);
         } else {
-            var token = new Token(Token.Type.ID, word);
-            variables.put(word, token);
-            return token;
+            return new Token(Token.Type.ID, word);
         }
     }
 
@@ -129,49 +125,50 @@ class Lexer {
     }
 
     private Token readSign(char currentChar) {
-        Token.Type type;
-
-        switch (currentChar) {
-            case '+':
-                type = Token.Type.PLUS;
-                break;
-            case '-':
-                type = Token.Type.MINUS;
-                break;
-            case '*':
-                type = Token.Type.MUL;
-                break;
-            case '/':
-                type = Token.Type.DIV;
-                break;
-            case '(':
-                type = Token.Type.LPAREN;
-                break;
-            case ')':
-                type = Token.Type.RPAREN;
-                break;
-            case '=':
-                type = Token.Type.ASSIGN;
-                break;
-            case '\n':  // Есть опасения, что в Windows не заработает тк там \t\n.
+        return switch (currentChar) {
+            case '+' -> {
                 pos += 1;
-                return Token.NEW_LINE;
-            case ';':
+                yield Token.PLUS;
+            }
+            case '-' -> {
                 pos += 1;
-                return Token.SEMI;
-            case ':':
+                yield Token.MINUS;
+            }
+            case '*' -> {
                 pos += 1;
-                return Token.COLON;
-            default:
-                throw new IllegalStateException(String.format("Неподдерживаемый символ %s позиция %d", currentChar, pos));
-        }
-
-        pos += 1;
-
-        return new Token(
-                type,
-                String.valueOf(currentChar)
-        );
+                yield Token.MUL;
+            }
+            case '/' -> {
+                pos += 1;
+                yield Token.DIV;
+            }
+            case '(' -> {
+                pos += 1;
+                yield Token.LPAREN;
+            }
+            case ')' -> {
+                pos += 1;
+                yield Token.RPAREN;
+            }
+            case '=' -> {
+                pos += 1;
+                yield Token.ASSIGN;
+            }
+            case '\n' -> {
+                pos += 1;
+                yield Token.NEW_LINE;
+            }
+            case ';' -> {
+                pos += 1;
+                yield Token.SEMI;
+            }
+            case ':' -> {
+                pos += 1;
+                yield Token.COLON;
+            }
+            default ->
+                    throw new IllegalStateException(String.format("Неподдерживаемый символ %s позиция %d", currentChar, pos));
+        };
     }
 
     private boolean isPartOfWord(char c) {

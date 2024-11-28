@@ -1,41 +1,43 @@
 package interpreter.ast;
 
-import interpreter.Interpreter;
 import interpreter.Token;
 
-public abstract class Identificator<T> implements AbstractSyntaxTree {
+public class Identificator implements AbstractSyntaxTree {
 
-    enum Type {
+    public enum Type {
         INTEGER, DOUBLE
     }
 
     private Type type;
-    private T value;
+    private Double value;
 
-    protected Identificator(Type type, T value) {
-        this.type = type;
-        this.value = value;
+    protected Identificator(Token type) {
+        if (type == Token.INTEGER) {
+            this.type = Type.INTEGER;
+        } else {
+            this.type = Type.DOUBLE;
+        }
     }
 
     public Type type() {
         return type;
     }
 
-    public T value() {
+    public Double value() {
         return value;
     }
 
-    public void update(T value) {
+    public void setValue(double value) {
         this.value = value;
     }
 
-    private void validate() {
-        if (type == Type.INTEGER && value instanceof Integer) {
-            return;
-        } else if (type == Type.DOUBLE && value instanceof Double) {
-            return;
-        } else {
-            throw new IllegalStateException("В переменную типа " + type.name() + " нельзя записать значение " + value);
-        }
-    }
+//    private void validate() {
+//        if (type == Type.INTEGER && value instanceof Integer) {
+//            return;
+//        } else if (type == Type.DOUBLE && value instanceof Double) {
+//            return;
+//        } else {
+//            throw new IllegalStateException("В переменную типа " + type.name() + " нельзя записать значение " + value);
+//        }
+//    }
 }
