@@ -29,10 +29,7 @@ import java.util.List;
 
 public class Interpreter {
 
-//    public static List<Variable> VARIABLES = new ArrayList<>();
-//    public static List<Constant> CONSTANTS = new ArrayList<>();
-
-    private static HashMap<String, Identificator> SYMBOL_TABLE = new HashMap<>();
+    private static final HashMap<String, Identificator> SYMBOL_TABLE = new HashMap<>();
 
     private final Lexer lexer = new Lexer();
     private Token currentToken;
@@ -76,17 +73,19 @@ public class Interpreter {
     private List<AbstractSyntaxTree> statementList() {
         var statements = new ArrayList<AbstractSyntaxTree>();
 
-        while (currentToken.equals(Token.NEW_LINE) || currentToken.equals(Token.SEMI)) {
+        while (currentToken == Token.NEW_LINE || currentToken == Token.SEMI) {
             currentToken = lexer.readNextToken();
 
-            if (currentToken.equals(Token.NEW_LINE) || currentToken.equals(Token.SEMI)) {
+            if (currentToken == Token.NEW_LINE || currentToken == Token.SEMI) {
                 continue;
+            } else if (currentToken == Token.EOF) {
+                break;
             }
 
             statements.add(statement());
         }
 
-        if (currentToken.type() != Token.Type.EOF) {
+        if (currentToken != Token.EOF) {
             throw new IllegalStateException("Некорректное выражение");
         }
 
@@ -133,11 +132,16 @@ public class Interpreter {
                 currentToken = lexer.readNextToken();
             }
 
+            Identificator id;
+
             if (idType == Token.LET) {
-                return SYMBOL_TABLE.put(name.value(), new Constant(valueType));
+                id = new Constant(valueType);
             } else /* if (idType == Token.Type.VAR) */ {
-                return SYMBOL_TABLE.put(name.value(), new Variable(valueType));
+                id = new Variable(valueType);
             }
+
+            SYMBOL_TABLE.put(name.value(), id);
+            return id;
         }
 
         AbstractSyntaxTree id = idAST(currentToken);
@@ -164,9 +168,9 @@ public class Interpreter {
             return variable;
         }
 
-        if (currentToken.type() != Token.Type.ASSIGN) {
+        if (currentToken != Token.ASSIGN) {
             throw new IllegalStateException(
-                    "Некорректный токен: " + currentToken.type() + " Ожидался оператор присваивания.");
+                    "Некорректный токен: " + currentToken + " Ожидался оператор присваивания.");
         }
 
         var assignToken = currentToken;
@@ -204,17 +208,13 @@ public class Interpreter {
             var op = currentToken;
             currentToken = lexer.readNextToken();
             return new UnaryOperation(op, factor());
-        } else if (currentToken == Token.INTEGER) {
-            var node = new Number(currentToken);
-            currentToken = lexer.readNextToken();
-            return node;
-        } else if (currentToken == Token.DOUBLE) {
-            var node = new Number(currentToken);
-            currentToken = lexer.readNextToken();
-            return node;
-        } else if (currentToken == Token.LPAREN) {
+        }else if (currentToken == Token.LPAREN) {
             currentToken = lexer.readNextToken();
             var node = expr();
+            currentToken = lexer.readNextToken();
+            return node;
+        } else if (currentToken.type() == Token.Type.NUMBER) {
+            var node = new Number(currentToken);
             currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.ID) {

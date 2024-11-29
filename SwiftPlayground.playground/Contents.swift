@@ -1,111 +1,25 @@
-let x0 = 10
-let x1 = 1
-let x2 = 2
-let x3 = 3
-let x4 = 4
-let x5 = 5
-let x6 = 6
-let x7 = 7
-let x8 = 8
-let x9 = 9
-let oLVEFzXx = x4+x2+x8 * x7-x2-x1 * x1-x0 * x1-x9
-let ETIIiqBD = +x2 * x3-x8+x0 * x2+x2-x2-x2+x4 * x2
-let gxrXoYII = x5+x0-x3+x7+x9+x8+x0+x8 * x8-x4
-let eEgwBaUn = x9+x6+x4 * x3 * x8 * x8+x3/x6+x6+x5
-let wMksSsBO = -x2-x6 * x3 * x7-x6+x1+x7 * x4-x1/x1
-let OvwpAWHY = -x7+x1+x9/x9-x3+x3 * x2 * x9+x3+x3
-let sRpKLSga = +x9+x1-x5/x3+x1-x5-x6 * x6+x5/x5
-let DMCjIBYh = x7+x8 * x0+x6-x5-x1 * x1+x4/x4-x4
-let zzavzwGp = x6 * x7-x2+x6+x3-x5 * x7 * x3+x7 * x7
-let lEHBrBMW = -x8+x5 * x2+x2+x7-x4-x0+x0+x4/x4
-let EFsIGaeM = +x3/x4+x3 * x1+x8 * x8/x5 * x8/x8-x5
-let HjskmMdu = +x4/x9+x1+x6/x5-x1-x1+x5-x4+x4
-let aiADJYBJ = x0 * x4+x1-x6-x0+x7+x2/x7-x2-x2
-let KJVPkLem = x7+x2-x0-x2 * x1 * x1-x4/x8 * x1+x1
-let jFvDHeLp = -x7 * x5+x5 * x6-x1-x1+x4-x4-x4 * x4
-let LKnmZkqV = +x2 * x2-x6 * x9 * x4-x2+x0-x2+x2+x8
-let ooUwdkMJ = -x7+x9+x0+x6+x2 * x2+x4/x4+x9+x4
-let DzvHeiex = +x8 * x6-x3+x3-x2+x4 * x3+x3/x3/x3
-let ZZIWpTJN = +x4+x1 * x3-x6+x6 * x2/x1 * x9+x6-x6
-let GPfZZuBs = x8+x8 * x2+x7+x4 * x7/x3-x3/x4+x4
-let bTKCVuHq = x5-x7-x6-x9+x3 * x7/x7-x6/x8 * x7
-let ffAjiJjS = +x8-x8 * x2+x2-x1+x7+x0 * x7-x5-x5
-let eEbBenED = x2/x2-x3-x3/x2+x5 * x2+x2/x2+x2
-let wYtheLxn = -x0 * x3-x9+x1-x1-x4 * x9+x0 * x0 * x0
-let tAmaoQCR = x7+x6-x3+x2 * x0 * x5-x0/x4/x5/x5
-let dxvHyjfj = -x9+x7+x2+x1 * x1 * x1 * x8-x8+x8/x8
-let cQTJDhdp = x2+x4+x6-x4+x5 * x7/x3-x7+x5 * x3
-let cQIWjTJX = +x7-x2-x5 * x8+x6 * x8+x4-x4-x3+x3
-let xDFhLkCp = +x9+x4+x1-x2+x3+x2-x9+x9-x8/x8
-let Pprdctfp = -x0-x3-x6+x8 * x2+x4+x2 * x2+x4/x4
-let ShPZxfKZ = +x6-x1 * x1 * x9 * x4-x0-x0+x2 * x0-x0
-let ZXbESNsG = +x9-x0-x6-x3+x6-x3+x2 * x5+x5-x5
-let hDDffCBz = +x3+x0 * x2-x8+x1 * x2-x2-x1+x8-x1
-let NuHdAIqo = -x2+x3-x5+x9 * x0+x0-x0+x0+x2 * x2
-let xSfuMaYS = x8+x4-x0 * x3-x6-x3/x3/x8 * x8/x8
-let iWLkmaxC = x3 * x4+x8 * x2+x8+x0+x9 * x2 * x4 * x0
-let AMUEwrSg = x3-x8-x8+x6 * x2/x6-x1-x8 * x2/x2
-let vSquQWgD = x1 * x4+x7+x9-x4 * x7/x7/x9/x9 * x9
-let snqgazMS = x0+x8 * x7 * x3+x5 * x5/x6+x6/x6+x2
-let JRkPVnrz = x3-x0 * x4 * x3+x2-x0+x0/x3/x2+x2
-let iIUWsqwP = x5 * x2+x2+x3-x6+x9/x8 * x9+x4+x8
-let AuTKwLra = x1-x2-x4-x0-x3 * x5-x2+x3/x8/x8
-let GRcPTfGi = +x0-x0/x2-x5+x9-x4 * x1-x1/x1/x1
-let VRQLrHLR = +x2 * x0-x3+x6 * x7/x4/x4-x6-x4+x4
-let ZFXHLuAG = +x1+x8+x0 * x3+x2-x5+x2 * x0 * x0/x5
-let GRmHLOVH = +x6 * x1 * x8-x9/x6 * x6+x9-x1+x9+x9
-let aKvsVkvI = +x4+x0 * x2-x1-x4+x3 * x9 * x5 * x5 * x9
-let CLQkOXiF = -x1+x8+x0+x2 * x4-x2 * x3+x0+x4/x3
-let PjBtsccR = x1-x2-x8+x7/x4/x5 * x6 * x6+x4+x6
-let JbUgtxKq = +x1+x5-x1-x2 * x0+x3 * x5-x6/x3-x8
-let pfjZvBPg = -x2-x5-x0-x4-x6+x7-x7+x4/x4+x5
-let mvwKGeWH = x7-x2+x2-x3-x0/x1+x9/x3+x4+x4
-let fKMuAxIy = -x2-x7-x0-x6 * x3 * x0+x0-x7 * x5 * x5
-let MYmrjYsr = x1 * x8-x8+x3+x8/x9/x2 * x9-x9+x3
-let ZWiSTfpR = x3-x8+x6 * x1-x5 * x7-x6 * x7+x6/x7
-let sPkTegdP = x1-x3+x4+x2 * x9/x5/x5+x9/x9+x5
-let vaSLduSU = -x6+x0 * x2 * x3+x0+x7 * x2 * x1-x0/x2
-let BhloVKuQ = +x8 * x0+x8-x1+x2/x7/x8-x7-x2/x2
-let hNoZrOCL = -x5+x1 * x0-x0-x0+x7+x1+x7/x7-x7
-let WiUSTSmM = -x3/x2 * x7+x2+x4-x4-x2/x2 * x2 * x8
-let sgXerTwI = x4+x5-x3-x5-x1 * x0/x3 * x3 * x3/x1
-let RZOafSvs = +x6-x2 * x0+x3 * x6 * x1+x0 * x1 * x9+x1
-let zibjWUeA = +x5 * x4+x6 * x1+x0+x8-x1-x0+x7+x7
-let IcaLdLUX = +x3+x8 * x0-x2-x2 * x5+x0-x2-x5/x5
-let rNFKyfjl = -x4+x7-x5+x5-x3-x4 * x2+x7/x7/x2
-let yEIEmNQm = +x4+x3 * x9-x6+x6-x2 * x4/x4/x1-x1
-let wwemcdrO = -x2-x2-x8-x4-x3+x1 * x6-x3+x0-x0
-let FPpqkaCs = -x2+x6 * x7+x2 * x0+x9 * x1+x4/x4-x4
-let GydoyNAt = -x1-x6-x4-x3/x6/x9 * x6-x5+x9 * x5
-let kYkirCsf = x8-x1 * x7 * x6-x0-x3+x3 * x0-x0/x3
-let qzCCexng = -x5+x9+x3 * x5-x5/x5/x6-x5-x7/x5
-let uvqboLlo = +x6 * x2 * x7-x9/x1/x6 * x7-x4-x1-x1
-let QUJfYuSu = +x3 * x5 * x6-x5+x5/x2+x4/x1-x4 * x5
-let MecpLVRw = -x0-x2+x3 * x1-x1-x0-x0+x3-x0+x0
-let PowulpEw = -x3/x8 * x4+x9-x9 * x4/x9+x6-x6+x9
-let oCgpnboV = -x4+x9+x2 * x2 * x3+x7-x5 * x3-x1+x1
-let jZXczbxr = x5 * x1 * x5-x6 * x8 * x1+x7-x7/x9-x1
-let rxgKVlIM = -x8 * x4-x9-x9+x5 * x5/x3-x2/x2+x6
-let CfZqVvxh = -x2+x1+x9+x7 * x0+x9 * x7 * x9 * x7 * x0
-let rLoEOKlA = -x2-x1-x7-x0 * x8+x6+x6+x6 * x7+x6
-let ejOorbIh = x6+x7+x1-x8 * x9-x0 * x7 * x4-x7-x7
-let xSYBywdn = -x4-x2 * x4 * x0+x1-x1-x1+x1-x2/x6
-let GHtjVKAq = -x3 * x2 * x1 * x5/x8+x1+x6 * x6-x4/x4
-let rFiZgaMx = -x9+x1-x5 * x4 * x7-x6 * x5-x7+x1-x7
-let UVRHbLOo = +x0-x9-x4/x4-x6 * x3+x9-x8+x9 * x8
-let GLgNAwKk = +x5 * x3/x7/x7/x7 * x2+x7/x7/x5/x5
-let hmAkALqv = +x1 * x4+x4+x9 * x7+x8-x8 * x0/x9 * x8
-let FKcLtkFD = +x9+x6-x8-x5+x7/x6-x5+x3 * x9/x9
-let xWHzQLzl = -x3+x0+x4 * x4 * x4+x8+x9 * x3/x3/x8
-let SqRXNpPi = x6 * x4 * x0-x1+x0-x9-x8-x8+x4/x4
-let bKcHtpji = +x9+x0-x2 * x5+x3-x1-x2+x7-x0/x7
-let CzOAMnGk = x4-x9 * x2-x7/x8+x8+x8 * x1/x1+x1
-let XJAUAuZl = -x0-x8 * x8 * x3-x7+x1-x3+x3-x7 * x7
-let fkuqghqh = -x0+x2 * x9+x6 * x1 * x6+x1-x7-x7-x7
-let BElMLYQl = +x0+x1/x5 * x6+x9+x9/x5-x5+x3 * x5
-let OssZyYMF = x0-x0 * x9+x6 * x9+x1 * x5 * x5+x6/x9
-let hukcaWFj = +x8 * x3 * x6/x9-x6/x3+x5/x9-x2-x9
-let GjWCrkHd = +x8+x6-x4-x6-x0 * x3+x6+x0 * x4/x6
-let wPsvuZPo = +x6-x4-x0-x1-x9+x5-x6/x3+x6/x6
-let oHpwHdbQ = +x9+x7+x1+x0+x0+x2-x7 * x0+x0 * x8
-let euYIzVAl = x7+x6-x2-x0/x8-x9-x9-x6+x6/x6
+
+// Пример кода
+let number: Int = -4
+var a = -6
+var b: Int
+var c: Int = a + number
+var x: Int
+let y: Double
+
+// number = 2
+b = 10 * a + 10 * number / 4
+c = a - -b
+
+x = 11
+y = 20 / 7 + 3.14
+
+// Token[type=ID, value=number] = -4.0
+// Token[type=ID, value=a] = -4.0
+// Token[type=ID, value=c] = -8.0
+// Token[type=ID, value=b] = -50.0
+// Token[type=ID, value=c] = -54.0
+// Token[type=ID, value=x] = 11.0
+// Token[type=ID, value=y] = 5.997142857142857
+// 0.0
+

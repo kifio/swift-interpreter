@@ -14,7 +14,7 @@ public class Identificator implements AbstractSyntaxTree {
     protected Identificator(Token type) {
         if (type == Token.INTEGER) {
             this.type = Type.INTEGER;
-        } else {
+        } else if (type == Token.DOUBLE) {
             this.type = Type.DOUBLE;
         }
     }
@@ -31,13 +31,7 @@ public class Identificator implements AbstractSyntaxTree {
         this.value = value;
     }
 
-//    private void validate() {
-//        if (type == Type.INTEGER && value instanceof Integer) {
-//            return;
-//        } else if (type == Type.DOUBLE && value instanceof Double) {
-//            return;
-//        } else {
-//            throw new IllegalStateException("В переменную типа " + type.name() + " нельзя записать значение " + value);
-//        }
-//    }
+    public void setType(Identificator.Type type) {
+        this.type = type;
+    }
 }

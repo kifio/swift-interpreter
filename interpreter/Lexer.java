@@ -26,7 +26,7 @@ class Lexer {
         skipComment();
 
         if (pos > text.length - 1) {
-            return new Token(Token.Type.EOF, null);
+            return Token.EOF;
         }
 
         if (Character.isDigit(text[pos])) {
@@ -49,12 +49,12 @@ class Lexer {
         if (text[pos] == '/') {
             do {
                 pos++;
-            } while (text[pos] != '\n' && pos <= text.length - 1);
+            } while (pos <= text.length - 1 && text[pos] != '\n');
 
         } else if (text[pos] == '*') {
             do {
                 pos++;
-            } while (!(text[pos] == '*' && text[pos + 1] == '/') && pos <= text.length - 1);
+            } while (pos <= text.length - 1&& !(text[pos] == '*' && text[pos + 1] == '/'));
             pos += 2;
         } else {
             pos--;
@@ -97,12 +97,9 @@ class Lexer {
         digitCharacters.add(currentChar);
         pos += 1;
 
-        Token.Type type = Token.Type.INTEGER;
-
         while (pos <= text.length - 1 && (Character.isDigit(text[pos]) || text[pos] == '.')) {
             digitCharacters.add(text[pos]);
             if (text[pos] == '.') {
-                type = Token.Type.DOUBLE;
                 pos += 1;
                 while (pos <= text.length - 1 && Character.isDigit(text[pos])) {
                     digitCharacters.add(text[pos]);
@@ -119,7 +116,7 @@ class Lexer {
         }
 
         return new Token(
-                type,
+                Token.Type.NUMBER,
                 new String(arr)
         );
     }
