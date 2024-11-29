@@ -29,7 +29,7 @@ import java.util.List;
 
 public class Interpreter {
 
-    private static final HashMap<String, Identificator> SYMBOL_TABLE = new HashMap<>();
+    private static final HashMap<String, Variable> SYMBOL_TABLE = new HashMap<>();
 
     private final Lexer lexer = new Lexer();
     private Token currentToken;
@@ -98,7 +98,7 @@ public class Interpreter {
 
     private AbstractSyntaxTree variable() {
         if (currentToken == Token.LET || currentToken == Token.VAR) {
-            Token idType = currentToken;
+            Token variableType = currentToken;
 
             currentToken = lexer.readNextToken();
 
@@ -110,7 +110,7 @@ public class Interpreter {
 
             Token name = currentToken;
 
-            if (idExist(name) || idExist(name)) {
+            if (SYMBOL_TABLE.containsKey(name.value())) {
                 throw new IllegalStateException(
                         "Идентификатор " + currentToken.value() + " уже объявлен."
                 );
@@ -132,34 +132,26 @@ public class Interpreter {
                 currentToken = lexer.readNextToken();
             }
 
-            Identificator id;
+            Variable variable;
 
-            if (idType == Token.LET) {
-                id = new Constant(valueType);
+            if (variableType == Token.LET) {
+                variable = new Constant(valueType);
             } else /* if (idType == Token.Type.VAR) */ {
-                id = new Variable(valueType);
+                variable = new Variable(valueType);
             }
 
-            SYMBOL_TABLE.put(name.value(), id);
-            return id;
+            SYMBOL_TABLE.put(name.value(), variable);
+            return variable;
         }
 
-        AbstractSyntaxTree id = idAST(currentToken);
+        AbstractSyntaxTree variable = SYMBOL_TABLE.get(currentToken.value());
 
-        if (id != null) {
+        if (variable != null) {
             currentToken = lexer.readNextToken();
-            return id;
+            return variable;
         }
 
         throw new IllegalStateException("Некорректный токен: " + currentToken.value());
-    }
-
-    private boolean idExist(Token t) {
-        return SYMBOL_TABLE.containsKey(t.value());
-    }
-
-    private AbstractSyntaxTree idAST(Token t) {
-        return SYMBOL_TABLE.get(t.value());
     }
 
     private AbstractSyntaxTree assignStatement(AbstractSyntaxTree variable) {
@@ -208,7 +200,7 @@ public class Interpreter {
             var op = currentToken;
             currentToken = lexer.readNextToken();
             return new UnaryOperation(op, factor());
-        }else if (currentToken == Token.LPAREN) {
+        } else if (currentToken == Token.LPAREN) {
             currentToken = lexer.readNextToken();
             var node = expr();
             currentToken = lexer.readNextToken();
@@ -218,7 +210,7 @@ public class Interpreter {
             currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.ID) {
-            var node = idAST(currentToken);
+            var node = SYMBOL_TABLE.get(currentToken.value());
             currentToken = lexer.readNextToken();
             return node;
         }

@@ -1,4 +1,5 @@
 package interpreter.ast;
 
-public interface AbstractSyntaxTree {}
-    
+public interface AbstractSyntaxTree {
+}
+

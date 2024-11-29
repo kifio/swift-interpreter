@@ -54,7 +54,7 @@ class Lexer {
         } else if (text[pos] == '*') {
             do {
                 pos++;
-            } while (pos <= text.length - 1&& !(text[pos] == '*' && text[pos + 1] == '/'));
+            } while (pos <= text.length - 1 && !(text[pos] == '*' && text[pos + 1] == '/'));
             pos += 2;
         } else {
             pos--;
@@ -115,10 +115,7 @@ class Lexer {
             arr[i] = digitCharacters.get(i);
         }
 
-        return new Token(
-                Token.Type.NUMBER,
-                new String(arr)
-        );
+        return new Token(Token.Type.NUMBER, new String(arr));
     }
 
     private Token readSign(char currentChar) {

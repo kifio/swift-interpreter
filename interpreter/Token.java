@@ -27,9 +27,6 @@ public record Token(Type type, String value) {
     }
 
     public enum Type {
-        SYMBOL,
-        ID,
-        NUMBER,
-        EOF
+        SYMBOL, ID, NUMBER, EOF
     }
 }
