@@ -19,10 +19,4 @@ public class Constant extends Variable {
         super.setValue(value);
         initialized = true;
     }
-
-    //    @Override
-//    public void calculate() {
-//        this.update();
-//        return Interpreter.SYMBOL_TABLE.getOrDefault(this.value().value(), 0.0);
-//    }
 }

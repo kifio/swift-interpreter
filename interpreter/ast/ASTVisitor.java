@@ -11,6 +11,8 @@ public class ASTVisitor {
             }
         } else if (ast instanceof Assign assign) {
             visitAssign(assign);
+        } else if (ast instanceof Function function) {
+            visitFunction(function);
         }
     }
 
@@ -24,6 +26,10 @@ public class ASTVisitor {
 
         variable.setValue(result.value);
         System.out.println(result.value);
+    }
+
+    void visitFunction(Function function) {
+        System.out.println("Смотрим объявление функции");
     }
 
     // Возвращает тип идентификатора (INTEGER, DOUBLE).

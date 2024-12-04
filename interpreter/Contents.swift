@@ -27,6 +27,17 @@ let y: Double
 b = 10 * a + 10 * number / 4
 c = a - -b
 
+func someFunc() {}
+
+func someFunc(with: Int, args: Double) {}
+
+func someFunc(with: Int, args: Double) {
+    let and = 0
+    var body = 1
+
+    and + body
+}
+
 x = 11
 y = 20 / 7 + 3.14
 

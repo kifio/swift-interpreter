@@ -3,7 +3,7 @@ package interpreter;
  * program : compound_statement
  * compound_statement : statement_list
  * statement_list : statement | statement (SEMI | NEW_LINE) statement_list
- * statement : compound_statement | assignment_statement | empty
+ * statement : compound_statement | assignment_statement | empty | function
  * assignment_statement : ((LET | VAR) | empty) variable (COLON (INT | DOUBLE) | empty) ASSIGN expr
  * empty :
  * expr: term ((PLUS | MINUS) term)*
@@ -14,6 +14,7 @@ package interpreter;
  *        | LPAREN expr RPAREN
  *        | variable
  * variable: ID
+ * function: FUNC name LPAREN (variable COLON (INT | DOUBLE) | empty) RPAREN OPENING_CURLY_BRACE compound_statement CLOSING_CURLY_BRACE
  */
 
 import interpreter.ast.Number;
@@ -29,7 +30,8 @@ import java.util.List;
 
 public class Interpreter {
 
-    private static final HashMap<String, Variable> SYMBOL_TABLE = new HashMap<>();
+    private static final HashMap<String, Variable> RUNTIME_MEMORY = new HashMap<>();
+    private static final HashMap<String, Function> FUNCTIONS = new HashMap<>();
 
     private final Lexer lexer = new Lexer();
     private Token currentToken;
@@ -93,10 +95,14 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree statement() {
-        return assignStatement(variable());
+        if (currentToken == Token.FUNC) {
+            return functionDeclaration();
+        } else {
+            return assignStatement(variableDeclaration());
+        }
     }
 
-    private AbstractSyntaxTree variable() {
+    private AbstractSyntaxTree variableDeclaration() {
         if (currentToken == Token.LET || currentToken == Token.VAR) {
             Token variableType = currentToken;
 
@@ -110,7 +116,7 @@ public class Interpreter {
 
             Token name = currentToken;
 
-            if (SYMBOL_TABLE.containsKey(name.value())) {
+            if (RUNTIME_MEMORY.containsKey(name.value())) {
                 throw new IllegalStateException(
                         "Идентификатор " + currentToken.value() + " уже объявлен."
                 );
@@ -140,11 +146,11 @@ public class Interpreter {
                 variable = new Variable(valueType);
             }
 
-            SYMBOL_TABLE.put(name.value(), variable);
+            RUNTIME_MEMORY.put(name.value(), variable);
             return variable;
         }
 
-        AbstractSyntaxTree variable = SYMBOL_TABLE.get(currentToken.value());
+        AbstractSyntaxTree variable = RUNTIME_MEMORY.get(currentToken.value());
 
         if (variable != null) {
             currentToken = lexer.readNextToken();
@@ -161,14 +167,72 @@ public class Interpreter {
         }
 
         if (currentToken != Token.ASSIGN) {
-            throw new IllegalStateException(
-                    "Некорректный токен: " + currentToken + " Ожидался оператор присваивания.");
+            throw new IllegalStateException("Некорректный токен: " + currentToken + " Ожидался оператор присваивания.");
         }
 
         var assignToken = currentToken;
         currentToken = lexer.readNextToken();
 
         return new Assign(variable, assignToken, expr());
+    }
+
+    private AbstractSyntaxTree functionDeclaration() {
+        currentToken = lexer.readNextToken();
+
+        if (FUNCTIONS.containsKey(currentToken.value())) {
+            throw new IllegalStateException("Идентификатор " + currentToken.value() + " уже объявлен.");
+        }
+
+        currentToken = lexer.readNextToken();
+
+        if (currentToken != Token.LPAREN) {
+            throw new IllegalStateException("Ожидался список аругментов функции");
+        }
+
+        HashMap<String, Constant> args = new HashMap<>();
+
+        currentToken = lexer.readNextToken();
+
+        while (currentToken != Token.RPAREN)  {
+
+            Token name = currentToken;
+            Token colon = lexer.readNextToken();
+            Token type = lexer.readNextToken();
+
+            if (name.type() != Token.Type.ID || colon != Token.COLON || (type != Token.INTEGER && type != Token.DOUBLE)) {
+                throw new IllegalStateException("Ожидался список аргументов функции вида имя: тип, имя: тип....");
+            }
+    
+            args.put(name.value(), new Constant(type));
+
+            currentToken = lexer.readNextToken();
+
+            if (currentToken != Token.COMMA) {
+                if (currentToken == Token.RPAREN) {
+                    break;
+                } else {
+                    throw new IllegalStateException("Аргументы должны быть разделены запятыми");
+                }
+            }
+
+            currentToken = lexer.readNextToken();
+        }
+
+        currentToken = lexer.readNextToken();
+
+        if (currentToken != Token.OPENING_CURLY_BRACE) {
+            throw new IllegalStateException("Тело функции должно быть заключено в фигурные скобки");
+        }
+
+        do  {
+            currentToken = lexer.readNextToken();
+        } while (currentToken != Token.CLOSING_CURLY_BRACE);
+
+        currentToken = lexer.readNextToken();
+
+        Function f = new Function(args);
+        FUNCTIONS.put(currentToken.value(), f);
+        return f;
     }
 
     private AbstractSyntaxTree expr() {
@@ -210,7 +274,7 @@ public class Interpreter {
             currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.ID) {
-            var node = SYMBOL_TABLE.get(currentToken.value());
+            var node = RUNTIME_MEMORY.get(currentToken.value());
             currentToken = lexer.readNextToken();
             return node;
         }

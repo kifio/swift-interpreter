@@ -14,6 +14,7 @@ class Lexer {
         keyWords.put(Token.VAR.value(), Token.VAR);
         keyWords.put(Token.INTEGER.value(), Token.INTEGER);
         keyWords.put(Token.DOUBLE.value(), Token.DOUBLE);
+        keyWords.put(Token.FUNC.value(), Token.FUNC);
     }
 
     void initialize(String expression) {
@@ -159,6 +160,18 @@ class Lexer {
             case ':' -> {
                 pos += 1;
                 yield Token.COLON;
+            }
+            case '{' -> {
+                pos += 1;
+                yield Token.OPENING_CURLY_BRACE;
+            }
+            case '}' -> {
+                pos += 1;
+                yield Token.CLOSING_CURLY_BRACE;
+            }
+            case ',' -> {
+                pos += 1;
+                yield Token.COMMA;
             }
             default ->
                     throw new IllegalStateException(String.format("Неподдерживаемый символ %s позиция %d", currentChar, pos));
