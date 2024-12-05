@@ -32,8 +32,6 @@ public class ASTVisitor {
         System.out.println("Смотрим объявление функции");
     }
 
-    // Возвращает тип идентификатора (INTEGER, DOUBLE).
-    // В случае, если это инициализированная константа выбрасывает ошибку.
     Variable visitLvalue(AbstractSyntaxTree lvalue) {
         if (lvalue instanceof Variable) {
             return (Variable) lvalue;

@@ -20,10 +20,10 @@ let number: Int = -4
 var a = -6
 var b: Int
 var c: Int = a + number
-var x: Int
-let y: Double
+// var x: Int
+// let y: Double
 
-// number = 2
+number = 2 + d
 b = 10 * a + 10 * number / 4
 c = a - -b
 

@@ -273,13 +273,12 @@ public class Interpreter {
             var node = new Number(currentToken);
             currentToken = lexer.readNextToken();
             return node;
-        } else if (currentToken.type() == Token.Type.ID) {
+        } else if (currentToken.type() == Token.Type.ID && RUNTIME_MEMORY.containsKey(currentToken.value())) {
             var node = RUNTIME_MEMORY.get(currentToken.value());
             currentToken = lexer.readNextToken();
             return node;
         }
 
-        throw new IllegalStateException(
-                String.format("Не удалось получить значение оператора. Обрабатываемый токен: %s", currentToken.type()));
+        throw new IllegalStateException("Некорректный токен: " + currentToken.value());
     }
 }
