@@ -4,7 +4,7 @@ package interpreter;
  * compound_statement : statement_list
  * statement_list : statement | statement (SEMI | NEW_LINE) statement_list
  * statement : compound_statement | assignment_statement | empty | function
- * assignment_statement : ((LET | VAR) | empty) variable (COLON (INT | DOUBLE) | empty) ASSIGN expr
+ * assignment_statement : variable ASSIGN expr
  * empty :
  * expr: term ((PLUS | MINUS) term)*
  * term: factor ((MUL | DIV) factor)*
@@ -13,8 +13,13 @@ package interpreter;
  *        | INTEGER
  *        | LPAREN expr RPAREN
  *        | variable
- * variable: ID
- * function: FUNC name LPAREN (variable COLON (INT | DOUBLE) | empty) RPAREN OPENING_CURLY_BRACE compound_statement CLOSING_CURLY_BRACE
+ * variable: ((LET | VAR) | empty) variable (COLON (INT | DOUBLE) | empty)
+ * function: FUNC ID LPAREN formal_parameter_list RPAREN OPENING_CURLY_BRACE compound_statement CLOSING_CURLY_BRACE
+ * formal_parameter_list: formal_parameter | formal_parameter COMMA formal_parameter_list
+ * formal_parameter: ID COLON (INT | DOUBLE) | empty
+ * function_call: ID(function_call_parameter_list)
+ * function_call_parameter_list: function_call_parameter | function_call_parameter COMMA function_call_parameter_list
+ * function_call_parameter: ID COLON expr | empty
  */
 
 import interpreter.ast.Number;
@@ -32,6 +37,8 @@ public class Interpreter {
 
     private static final HashMap<String, Variable> RUNTIME_MEMORY = new HashMap<>();
     private static final HashMap<String, Function> FUNCTIONS = new HashMap<>();
+
+    public static final String GLOBAL_SCOPE = "GLOBAL_SCOPE";
 
     private final Lexer lexer = new Lexer();
     private Token currentToken;
@@ -65,14 +72,14 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree program() {
-        return compoundStatement();
+        return compoundStatement(GLOBAL_SCOPE);
     }
 
-    private AbstractSyntaxTree compoundStatement() {
-        return new Compound(statementList());
+    private AbstractSyntaxTree compoundStatement(String scope) {
+        return new Compound(statementList(scope));
     }
 
-    private List<AbstractSyntaxTree> statementList() {
+    private List<AbstractSyntaxTree> statementList(String scope) {
         var statements = new ArrayList<AbstractSyntaxTree>();
 
         while (currentToken == Token.NEW_LINE || currentToken == Token.SEMI) {
@@ -80,29 +87,27 @@ public class Interpreter {
 
             if (currentToken == Token.NEW_LINE || currentToken == Token.SEMI) {
                 continue;
-            } else if (currentToken == Token.EOF) {
+            } else if (currentToken == Token.EOF || currentToken == Token.CLOSING_CURLY_BRACE) {
                 break;
             }
 
-            statements.add(statement());
+            if (currentToken == Token.FUNC) {
+                functionDeclaration();
+            } else if (FUNCTIONS.containsKey(currentToken.value()) ) {
+                statements.add(functionCall(FUNCTIONS.get(currentToken.value())));
+            } else {
+                statements.add(assignStatement(variableDeclaration(scope)));
+            }
         }
 
-        if (currentToken != Token.EOF) {
-            throw new IllegalStateException("Некорректное выражение");
+        if (currentToken == Token.EOF || currentToken == Token.CLOSING_CURLY_BRACE) {
+            return statements;
         }
 
-        return statements;
+        throw new IllegalStateException("Некорректное выражение");
     }
 
-    private AbstractSyntaxTree statement() {
-        if (currentToken == Token.FUNC) {
-            return functionDeclaration();
-        } else {
-            return assignStatement(variableDeclaration());
-        }
-    }
-
-    private AbstractSyntaxTree variableDeclaration() {
+    private AbstractSyntaxTree variableDeclaration(String scope) {
         if (currentToken == Token.LET || currentToken == Token.VAR) {
             Token variableType = currentToken;
 
@@ -141,9 +146,9 @@ public class Interpreter {
             Variable variable;
 
             if (variableType == Token.LET) {
-                variable = new Constant(valueType);
+                variable = new Constant(valueType, scope);
             } else /* if (idType == Token.Type.VAR) */ {
-                variable = new Variable(valueType);
+                variable = new Variable(valueType, scope);
             }
 
             RUNTIME_MEMORY.put(name.value(), variable);
@@ -176,17 +181,15 @@ public class Interpreter {
         return new Assign(variable, assignToken, expr());
     }
 
-    private AbstractSyntaxTree functionDeclaration() {
+    private void functionDeclaration() {
         currentToken = lexer.readNextToken();
 
-        if (FUNCTIONS.containsKey(currentToken.value())) {
-            throw new IllegalStateException("Идентификатор " + currentToken.value() + " уже объявлен.");
-        }
+        String functionName = currentToken.value();
 
         currentToken = lexer.readNextToken();
 
         if (currentToken != Token.LPAREN) {
-            throw new IllegalStateException("Ожидался список аругментов функции");
+            throw new IllegalStateException("Ожидался список аргументов функции");
         }
 
         HashMap<String, Constant> args = new HashMap<>();
@@ -203,7 +206,7 @@ public class Interpreter {
                 throw new IllegalStateException("Ожидался список аргументов функции вида имя: тип, имя: тип....");
             }
     
-            args.put(name.value(), new Constant(type));
+            args.put(name.value(), new Constant(type, functionName));
 
             currentToken = lexer.readNextToken();
 
@@ -224,15 +227,29 @@ public class Interpreter {
             throw new IllegalStateException("Тело функции должно быть заключено в фигурные скобки");
         }
 
-        do  {
-            currentToken = lexer.readNextToken();
-        } while (currentToken != Token.CLOSING_CURLY_BRACE);
+        currentToken = lexer.readNextToken();
+
+        List<AbstractSyntaxTree> functionBody = statementList(functionName);
 
         currentToken = lexer.readNextToken();
 
-        Function f = new Function(args);
-        FUNCTIONS.put(currentToken.value(), f);
-        return f;
+        Function f = new Function(functionName, args, functionBody);
+
+        if (FUNCTIONS.containsKey(functionName)) {
+            throw new IllegalStateException("Функция " + functionName + "с такими параметрами уже объявлена.");
+        }
+
+        FUNCTIONS.put(functionName, f);
+    }
+
+    private AbstractSyntaxTree functionCall(Function function) {
+        // TODO: Прочитать список аргументов в вызове функции
+//        for (String arg: function.args().keySet()) {
+//            Variable v = RUNTIME_MEMORY.get(arg);
+//            if (v.scope().equals(function.name())) {
+//                v.setValue(a);
+//            }
+//        }
     }
 
     private AbstractSyntaxTree expr() {

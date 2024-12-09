@@ -16,30 +16,32 @@
 **/
 
 // Пример кода
-let number: Int = -4
-var a = -6
-var b: Int
-var c: Int = a + number
+// let number: Int = -4
+// var a = -6
+// var b: Int
+// var c: Int = a + number
 // var x: Int
-// let y: Double
+let y: Double
 
-number = 2 + d
-b = 10 * a + 10 * number / 4
-c = a - -b
-
-func someFunc() {}
-
-func someFunc(with: Int, args: Double) {}
+// number = 2 + a
+// b = 10 * a + 10 * number / 4
+// c = a - -b
+//
+// func someFunc() {}
+//
+// func someFunc(with: Int, args: Double) {}
 
 func someFunc(with: Int, args: Double) {
     let and = 0
-    var body = 1
+    var body = 1 / args
 
-    and + body
+    y = and + body + with
 }
 
-x = 11
-y = 20 / 7 + 3.14
+someFunc(with: 10: args: 0.5)
+
+// x = 11
+// y = 20 / 7 + 3.14
 
 // Token[type=ID, value=number] = -4.0
 // Token[type=ID, value=a] = -4.0

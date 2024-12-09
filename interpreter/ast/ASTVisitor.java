@@ -1,5 +1,6 @@
 package interpreter.ast;
 
+import interpreter.Interpreter;
 import interpreter.Token;
 
 public class ASTVisitor {
@@ -11,14 +12,14 @@ public class ASTVisitor {
             }
         } else if (ast instanceof Assign assign) {
             visitAssign(assign);
-        } else if (ast instanceof Function function) {
+        } else if (ast instanceof FunctionCall function) {
             visitFunction(function);
         }
     }
 
     void visitAssign(Assign assign) {
         Variable variable = visitLvalue(assign.left());
-        ExpressionResult result = visitRvalue(assign.right(), variable.type());
+        ExpressionResult result = visitRvalue(assign.right(), variable.type(), variable.scope());
 
         if (variable.type() == null) {
             variable.setType(result.type);
@@ -28,8 +29,10 @@ public class ASTVisitor {
         System.out.println(result.value);
     }
 
-    void visitFunction(Function function) {
-        System.out.println("Смотрим объявление функции");
+    void visitFunction(FunctionCall function) {
+        for (AbstractSyntaxTree statement : function.statementList()) {
+            visitAST(statement);
+        }
     }
 
     Variable visitLvalue(AbstractSyntaxTree lvalue) {
@@ -40,31 +43,31 @@ public class ASTVisitor {
         }
     }
 
-    ExpressionResult visitRvalue(AbstractSyntaxTree ast, DataType valueType) {
+    ExpressionResult visitRvalue(AbstractSyntaxTree ast, DataType valueType, String scope) {
         return switch (ast) {
-            case BinaryOperation op -> visitBinaryOp(op, valueType);
-            case UnaryOperation op -> visitUnaryOp(op, valueType);
+            case BinaryOperation op -> visitBinaryOp(op, valueType, scope);
+            case UnaryOperation op -> visitUnaryOp(op, valueType, scope);
             case Number n -> visitNumber(n, valueType);
-            case Variable v -> visitVariable(v, valueType);
+            case Variable v -> visitVariable(v, valueType, scope);
             default -> throw new IllegalStateException(ast + " не является rValue");
         };
     }
 
-    ExpressionResult visitBinaryOp(BinaryOperation op, DataType valueType) {
-        return visitRvalue(op.left(), valueType).apply(visitRvalue(op.right(), valueType), op.opToken());
+    ExpressionResult visitBinaryOp(BinaryOperation op, DataType valueType, String scope) {
+        return visitRvalue(op.left(), valueType, scope).apply(visitRvalue(op.right(), valueType, scope), op.opToken());
     }
 
-    ExpressionResult visitUnaryOp(UnaryOperation op, DataType valueType) {
+    ExpressionResult visitUnaryOp(UnaryOperation op, DataType valueType, String scope) {
         if (op.opToken() == Token.PLUS) {
-            return visitRvalue(op.right(), valueType);
+            return visitRvalue(op.right(), valueType, scope);
         } else if (op.opToken() == Token.MINUS) {
-            ExpressionResult result = visitRvalue(op.right(), valueType);
+            ExpressionResult result = visitRvalue(op.right(), valueType, scope);
             return new ExpressionResult(
                     result.type,
                     -result.value
             );
         } else {
-            throw new IllegalStateException(String.format("Неизвестная унарная операция при вычислении", op.opToken()));
+            throw new IllegalStateException("Неизвестная унарная операция при вычислении: " + op.opToken());
         }
     }
 
@@ -94,22 +97,26 @@ public class ASTVisitor {
         }
     }
 
-    ExpressionResult visitVariable(Variable variable, DataType valueType) {
-        if (valueType == DataType.INTEGER) {
-            if (variable.type() == DataType.INTEGER) {
+    ExpressionResult visitVariable(Variable variable, DataType valueType, String scope) {
+        if (scope.equals(Interpreter.GLOBAL_SCOPE) || scope.equals(variable.scope())) {
+            if (valueType == DataType.INTEGER) {
+                if (variable.type() == DataType.INTEGER) {
+                    return new ExpressionResult(
+                            DataType.INTEGER,
+                            variable.value()
+                    );
+                } else {
+                    throw new NumberFormatException("Нельзя записать " + variable.type() + " в " + valueType);
+                }
+            } else {
                 return new ExpressionResult(
-                        DataType.INTEGER,
+                        DataType.DOUBLE,
                         variable.value()
                 );
-            } else {
-                throw new NumberFormatException("Нельзя записать " + variable.type() + " в " + valueType);
             }
-        } else {
-            return new ExpressionResult(
-                    DataType.DOUBLE,
-                    variable.value()
-            );
         }
+
+        throw new NumberFormatException("Переменная из области видимости " + variable.scope() + " недоступна в " + scope);
     }
 
     private static class ExpressionResult {

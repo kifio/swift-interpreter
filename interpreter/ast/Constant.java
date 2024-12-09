@@ -6,8 +6,8 @@ public class Constant extends Variable {
 
     private boolean initialized = false;
 
-    public Constant(Token type) {
-        super(type);
+    public Constant(Token type, String scope) {
+        super(type, scope);
     }
 
     @Override
