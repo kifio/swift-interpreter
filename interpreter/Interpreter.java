@@ -35,13 +35,17 @@ import java.util.List;
 
 public class Interpreter {
 
-    private static final HashMap<String, Variable> RUNTIME_MEMORY = new HashMap<>();
+    public static final HashMap<String, HashMap<String, Variable>> SCOPES = new HashMap<>();
     private static final HashMap<String, Function> FUNCTIONS = new HashMap<>();
 
     public static final String GLOBAL_SCOPE = "GLOBAL_SCOPE";
 
     private final Lexer lexer = new Lexer();
     private Token currentToken;
+
+    public Interpreter() {
+        SCOPES.put(GLOBAL_SCOPE, new HashMap<>());
+    }
 
     public static void main(String[] args) {
         try {
@@ -72,11 +76,11 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree program() {
-        return compoundStatement(GLOBAL_SCOPE);
+        return compoundStatement();
     }
 
-    private AbstractSyntaxTree compoundStatement(String scope) {
-        return new Compound(statementList(scope));
+    private AbstractSyntaxTree compoundStatement() {
+        return new Compound(statementList(GLOBAL_SCOPE));
     }
 
     private List<AbstractSyntaxTree> statementList(String scope) {
@@ -96,7 +100,7 @@ public class Interpreter {
             } else if (FUNCTIONS.containsKey(currentToken.value()) ) {
                 statements.add(functionCall(FUNCTIONS.get(currentToken.value())));
             } else {
-                statements.add(assignStatement(variableDeclaration(scope)));
+                statements.add(assignStatement(variableDeclaration(scope), scope));
             }
         }
 
@@ -120,8 +124,9 @@ public class Interpreter {
             }
 
             Token name = currentToken;
+            SCOPES.putIfAbsent(scope, new HashMap<>());
 
-            if (RUNTIME_MEMORY.containsKey(name.value())) {
+            if (SCOPES.get(scope).containsKey(name.value())) {
                 throw new IllegalStateException(
                         "Идентификатор " + currentToken.value() + " уже объявлен."
                 );
@@ -151,11 +156,11 @@ public class Interpreter {
                 variable = new Variable(valueType, scope);
             }
 
-            RUNTIME_MEMORY.put(name.value(), variable);
+            SCOPES.get(scope).put(name.value(), variable);
             return variable;
         }
 
-        AbstractSyntaxTree variable = RUNTIME_MEMORY.get(currentToken.value());
+        AbstractSyntaxTree variable = getForScopeOrForGlobalScope(scope, currentToken.value());
 
         if (variable != null) {
             currentToken = lexer.readNextToken();
@@ -165,7 +170,7 @@ public class Interpreter {
         throw new IllegalStateException("Некорректный токен: " + currentToken.value());
     }
 
-    private AbstractSyntaxTree assignStatement(AbstractSyntaxTree variable) {
+    private AbstractSyntaxTree assignStatement(AbstractSyntaxTree variable, String scope) {
 
         if (currentToken == Token.NEW_LINE) {
             return variable;
@@ -178,7 +183,7 @@ public class Interpreter {
         var assignToken = currentToken;
         currentToken = lexer.readNextToken();
 
-        return new Assign(variable, assignToken, expr());
+        return new Assign(variable, assignToken, expr(scope));
     }
 
     private void functionDeclaration() {
@@ -193,6 +198,7 @@ public class Interpreter {
         }
 
         HashMap<String, Constant> args = new HashMap<>();
+        SCOPES.putIfAbsent(functionName, new HashMap<>());
 
         currentToken = lexer.readNextToken();
 
@@ -243,59 +249,61 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree functionCall(Function function) {
-        // TODO: Прочитать список аргументов в вызове функции
-//        for (String arg: function.args().keySet()) {
-//            Variable v = RUNTIME_MEMORY.get(arg);
-//            if (v.scope().equals(function.name())) {
-//                v.setValue(a);
-//            }
-//        }
+        return new FunctionCall(function.name(), function.args(), function.statementList());
     }
 
-    private AbstractSyntaxTree expr() {
-        var left = term();
+    private AbstractSyntaxTree expr(String scope) {
+        var left = term(scope);
 
         while (currentToken.isSumOrSub()) {
             var op = currentToken;
             currentToken = lexer.readNextToken();
-            left = new BinaryOperation(left, op, term());
+            left = new BinaryOperation(left, op, term(scope));
         }
 
         return left;
     }
 
-    private AbstractSyntaxTree term() {
-        var left = factor();
+    private AbstractSyntaxTree term(String scope) {
+        var left = factor(scope);
 
         while (currentToken.isMulOrDiv()) {
             var op = currentToken;
             currentToken = lexer.readNextToken();
-            left = new BinaryOperation(left, op, factor());
+            left = new BinaryOperation(left, op, factor(scope));
         }
 
         return left;
     }
 
-    private AbstractSyntaxTree factor() {
+    private AbstractSyntaxTree factor(String scope) {
         if (currentToken.isSumOrSub()) {
             var op = currentToken;
             currentToken = lexer.readNextToken();
-            return new UnaryOperation(op, factor());
+            return new UnaryOperation(op, factor(scope));
         } else if (currentToken == Token.LPAREN) {
             currentToken = lexer.readNextToken();
-            var node = expr();
+            var node = expr(scope);
             currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.NUMBER) {
             var node = new Number(currentToken);
             currentToken = lexer.readNextToken();
             return node;
-        } else if (currentToken.type() == Token.Type.ID && RUNTIME_MEMORY.containsKey(currentToken.value())) {
-            var node = RUNTIME_MEMORY.get(currentToken.value());
+        } else if (currentToken.type() == Token.Type.ID) {
+            var node = getForScopeOrForGlobalScope(scope, currentToken.value());
             currentToken = lexer.readNextToken();
             return node;
         }
 
         throw new IllegalStateException("Некорректный токен: " + currentToken.value());
+    }
+
+    private Variable getForScopeOrForGlobalScope(String scope, String variable) {
+        if (SCOPES.containsKey(scope) && SCOPES.get(scope).containsKey(variable)) {
+            return SCOPES.get(scope).get(variable);
+        } else {
+            return SCOPES.get(GLOBAL_SCOPE).get(variable);
+        }
     }
 }

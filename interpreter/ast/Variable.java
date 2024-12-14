@@ -18,6 +18,11 @@ public class Variable implements AbstractSyntaxTree {
         this.scope = scope;
     }
 
+    protected Variable(DataType type, String scope) {
+        this.type = type;
+        this.scope = scope;
+    }
+
     public DataType type() {
         return type;
     }
@@ -36,5 +41,10 @@ public class Variable implements AbstractSyntaxTree {
 
     public void setType(DataType type) {
         this.type = type;
+    }
+
+    @Override
+    public AbstractSyntaxTree copy() {
+        return new Variable(type, scope);
     }
 }

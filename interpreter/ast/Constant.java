@@ -10,6 +10,10 @@ public class Constant extends Variable {
         super(type, scope);
     }
 
+    private Constant(DataType type, String scope) {
+        super(type, scope);
+    }
+
     @Override
     public void setValue(double value) {
         if (initialized) {
@@ -18,5 +22,10 @@ public class Constant extends Variable {
 
         super.setValue(value);
         initialized = true;
+    }
+
+    @Override
+    public AbstractSyntaxTree copy() {
+        return new Constant(type(), scope());
     }
 }

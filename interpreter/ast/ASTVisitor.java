@@ -30,6 +30,10 @@ public class ASTVisitor {
     }
 
     void visitFunction(FunctionCall function) {
+        for (String name: function.args().keySet()) {
+            Interpreter.SCOPES.get(function.name()).put(name, function.args().get(name));
+        }
+
         for (AbstractSyntaxTree statement : function.statementList()) {
             visitAST(statement);
         }
