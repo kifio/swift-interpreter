@@ -35,7 +35,7 @@ func someFunc(with: Int, args: Double) {
     let and = 0
     var body = 1 / args
 
-    y = and + body + with
+//    y = and + body + with
 }
 
 someFunc(with: 10: args: 0.5)

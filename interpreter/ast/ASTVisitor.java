@@ -1,5 +1,6 @@
 package interpreter.ast;
 
+import interpreter.Function;
 import interpreter.Interpreter;
 import interpreter.Token;
 
@@ -17,7 +18,7 @@ public class ASTVisitor {
         }
     }
 
-    void visitAssign(Assign assign) {
+    void visitAssign(Assign assign, String scope) {
         Variable variable = visitLvalue(assign.left());
         ExpressionResult result = visitRvalue(assign.right(), variable.type(), variable.scope());
 
@@ -25,16 +26,20 @@ public class ASTVisitor {
             variable.setType(result.type);
         }
 
-        variable.setValue(result.value);
+        Interpreter.SCOPES.get(scope).put(variable.name(), result.value);
         System.out.println(result.value);
     }
 
-    void visitFunction(FunctionCall function) {
-        for (String name: function.args().keySet()) {
-            Interpreter.SCOPES.get(function.name()).put(name, function.args().get(name));
+    void visitFunction(FunctionCall functionCall) {
+        Function function = Interpreter.FUNCTIONS.get(functionCall.name());
+
+        for (Token name: functionCall.args().keySet()) {
+            Constant c = (Constant) function.args().get(name.value()).copy();
+            c.setValue(visitNumber(new Number(functionCall.args().get(name)), c.type()).value);
+            Interpreter.SCOPES.get(function.name()).put(name.value(), c);
         }
 
-        for (AbstractSyntaxTree statement : function.statementList()) {
+        for (AbstractSyntaxTree statement : functionCall.statementList()) {
             visitAST(statement);
         }
     }

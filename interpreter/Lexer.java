@@ -106,8 +106,9 @@ class Lexer {
                     digitCharacters.add(text[pos]);
                     pos += 1;
                 }
+            } else {
+                pos += 1;
             }
-            pos += 1;
         }
 
         char[] arr = new char[digitCharacters.size()];

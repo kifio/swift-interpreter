@@ -32,11 +32,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.ToLongBiFunction;
 
 public class Interpreter {
 
-    public static final HashMap<String, HashMap<String, Variable>> SCOPES = new HashMap<>();
-    private static final HashMap<String, Function> FUNCTIONS = new HashMap<>();
+    public static final HashMap<String, HashMap<String, Double>> SCOPES = new HashMap<>();
+    public static final HashMap<String, Function> FUNCTIONS = new HashMap<>();
 
     public static final String GLOBAL_SCOPE = "GLOBAL_SCOPE";
 
@@ -151,12 +153,12 @@ public class Interpreter {
             Variable variable;
 
             if (variableType == Token.LET) {
-                variable = new Constant(valueType, scope);
+                variable = new Constant(name.value(), valueType, scope);
             } else /* if (idType == Token.Type.VAR) */ {
-                variable = new Variable(valueType, scope);
+                variable = new Variable(name.value(), valueType, scope);
             }
 
-            SCOPES.get(scope).put(name.value(), variable);
+            SCOPES.get(scope).put(name.value(), null);
             return variable;
         }
 
@@ -211,8 +213,11 @@ public class Interpreter {
             if (name.type() != Token.Type.ID || colon != Token.COLON || (type != Token.INTEGER && type != Token.DOUBLE)) {
                 throw new IllegalStateException("Ожидался список аргументов функции вида имя: тип, имя: тип....");
             }
-    
-            args.put(name.value(), new Constant(type, functionName));
+
+            Constant c = new Constant(name.value(), type, functionName);
+
+            args.put(name.value(), c);
+            SCOPES.get(functionName).put(name.value(), null);
 
             currentToken = lexer.readNextToken();
 
@@ -249,7 +254,57 @@ public class Interpreter {
     }
 
     private AbstractSyntaxTree functionCall(Function function) {
-        return new FunctionCall(function.name(), function.args(), function.statementList());
+        currentToken = lexer.readNextToken();
+
+        if (currentToken != Token.LPAREN) {
+            throw new IllegalStateException("Ожидается список значений аргументов функции");
+        }
+
+        Map<Token, Token> args = new HashMap<>();
+
+        while (currentToken != Token.RPAREN) {
+
+            Token name = lexer.readNextToken();
+
+            if (name.type() != Token.Type.ID) {
+                throw new IllegalStateException("Ожидалось имя аргумента функции");
+            }
+
+            currentToken = lexer.readNextToken();
+
+            if (currentToken != Token.COLON) {
+                throw new IllegalStateException("Неправильное форматирование списка аргуементов функции");
+            }
+
+            Token value = lexer.readNextToken();
+
+            if (value.type() != Token.Type.NUMBER) {
+                throw new IllegalStateException("Ожидалось значение аргумента функции");
+            }
+
+            args.put(name, value);
+            currentToken = lexer.readNextToken();
+        }
+
+        var list = new ArrayList<AbstractSyntaxTree>();
+
+        for (AbstractSyntaxTree ast: function.statementList()) {
+            list.add(ast.copy());
+//            function.statementList().stream().map(AbstractSyntaxTree::copy).toList();
+        }
+
+
+        FunctionCall functionCall = new FunctionCall(
+                function.name(),
+                args,
+                list
+
+        );
+
+        currentToken = lexer.readNextToken();
+
+
+        return  functionCall;
     }
 
     private AbstractSyntaxTree expr(String scope) {

@@ -6,26 +6,31 @@ public class Constant extends Variable {
 
     private boolean initialized = false;
 
-    public Constant(Token type, String scope) {
-        super(type, scope);
+    public Constant(String name, Token type, String scope) {
+        super(name, type, scope);
     }
 
-    private Constant(DataType type, String scope) {
-        super(type, scope);
+    private Constant(String name, DataType type, String scope) {
+        super(name, type, scope);
     }
 
-    @Override
-    public void setValue(double value) {
-        if (initialized) {
-            throw new IllegalStateException("Поле уже инициализировано");
-        }
+//    @Override
+//    public void setValue(double value) {
+//        if (initialized) {
+//            throw new IllegalStateException("Поле уже инициализировано");
+//        }
+//
+//        super.setValue(value);
+//        initialized = true;
+//
 
-        super.setValue(value);
-        initialized = true;
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override
     public AbstractSyntaxTree copy() {
-        return new Constant(type(), scope());
+        return new Constant(name(), type(), scope());
     }
 }
