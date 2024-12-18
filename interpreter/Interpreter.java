@@ -37,7 +37,7 @@ import java.util.function.ToLongBiFunction;
 
 public class Interpreter {
 
-    public static final HashMap<String, HashMap<String, Double>> SCOPES = new HashMap<>();
+    public static final HashMap<String, HashMap<String, Identifier>> SCOPES = new HashMap<>();
     public static final HashMap<String, Function> FUNCTIONS = new HashMap<>();
 
     public static final String GLOBAL_SCOPE = "GLOBAL_SCOPE";
@@ -65,7 +65,7 @@ public class Interpreter {
                 sb.append('\n');
             }
 
-            new ASTVisitor().visitAST(new Interpreter().interpret(sb.toString().trim()));
+            new ASTVisitor().visitAST(new Interpreter().interpret(sb.toString().trim()), GLOBAL_SCOPE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -150,23 +150,22 @@ public class Interpreter {
                 currentToken = lexer.readNextToken();
             }
 
-            Variable variable;
+            SCOPES.get(scope).put(name.value(), new Identifier(name, valueType, variableType == Token.LET));
 
-            if (variableType == Token.LET) {
-                variable = new Constant(name.value(), valueType, scope);
-            } else /* if (idType == Token.Type.VAR) */ {
-                variable = new Variable(name.value(), valueType, scope);
-            }
-
-            SCOPES.get(scope).put(name.value(), null);
-            return variable;
+            return new Variable(name);
         }
 
-        AbstractSyntaxTree variable = getForScopeOrForGlobalScope(scope, currentToken.value());
+        if (currentToken.type() != Token.Type.ID) {
+            throw new IllegalStateException(
+                    "Некорректный токен: " + currentToken.type() + " Ожидалось имя переменной."
+            );
+        }
 
-        if (variable != null) {
+        Token name = currentToken;
+        
+        if (SCOPES.get(scope).containsKey(name.value()) || SCOPES.get(GLOBAL_SCOPE).containsKey(name.value())) {
             currentToken = lexer.readNextToken();
-            return variable;
+            return new Variable(name);
         }
 
         throw new IllegalStateException("Некорректный токен: " + currentToken.value());
@@ -199,7 +198,7 @@ public class Interpreter {
             throw new IllegalStateException("Ожидался список аргументов функции");
         }
 
-        HashMap<String, Constant> args = new HashMap<>();
+        HashMap<String, Identifier> args = new HashMap<>();
         SCOPES.putIfAbsent(functionName, new HashMap<>());
 
         currentToken = lexer.readNextToken();
@@ -214,9 +213,9 @@ public class Interpreter {
                 throw new IllegalStateException("Ожидался список аргументов функции вида имя: тип, имя: тип....");
             }
 
-            Constant c = new Constant(name.value(), type, functionName);
+            Identifier arg = new Identifier(name, type, true);
 
-            args.put(name.value(), c);
+            args.put(name.value(), arg);
             SCOPES.get(functionName).put(name.value(), null);
 
             currentToken = lexer.readNextToken();
@@ -346,7 +345,7 @@ public class Interpreter {
             currentToken = lexer.readNextToken();
             return node;
         } else if (currentToken.type() == Token.Type.ID) {
-            var node = getForScopeOrForGlobalScope(scope, currentToken.value());
+            var node = new Reference(currentToken);
             currentToken = lexer.readNextToken();
             return node;
         }
@@ -354,7 +353,7 @@ public class Interpreter {
         throw new IllegalStateException("Некорректный токен: " + currentToken.value());
     }
 
-    private Variable getForScopeOrForGlobalScope(String scope, String variable) {
+    public static Identifier find(String variable, String scope) {
         if (SCOPES.containsKey(scope) && SCOPES.get(scope).containsKey(variable)) {
             return SCOPES.get(scope).get(variable);
         } else {

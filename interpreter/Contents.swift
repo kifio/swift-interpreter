@@ -39,6 +39,8 @@ func someFunc(with: Int, args: Double) {
 }
 
 someFunc(with: 10: args: 0.5)
+someFunc(with: 10: args: 2.5)
+
 
 // x = 11
 // y = 20 / 7 + 3.14

@@ -2,10 +2,9 @@ package interpreter.ast;
 
 import interpreter.Token;
 
-public record Variable(Token name) implements AbstractSyntaxTree {
-
+public record Reference(Token token) implements AbstractSyntaxTree {
     @Override
     public AbstractSyntaxTree copy() {
-        return new Variable(name);
+        return new Reference(token);
     }
 }
