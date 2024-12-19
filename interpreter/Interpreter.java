@@ -30,6 +30,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,8 @@ import java.util.function.ToLongBiFunction;
 
 public class Interpreter {
 
-    public static final HashMap<String, HashMap<String, Identifier>> SCOPES = new HashMap<>();
-    public static final HashMap<String, Function> FUNCTIONS = new HashMap<>();
+    public static final Map<String, Map<String, Identifier>> SCOPES = new HashMap<>();
+    public static final Map<String, Function> FUNCTIONS = new HashMap<>();
 
     public static final String GLOBAL_SCOPE = "GLOBAL_SCOPE";
 
@@ -190,6 +191,10 @@ public class Interpreter {
     private void functionDeclaration() {
         currentToken = lexer.readNextToken();
 
+        if (FUNCTIONS.containsKey(currentToken.value())) {
+            throw new IllegalStateException("Функция " + currentToken + " уже объявлена.");
+        }
+
         String functionName = currentToken.value();
 
         currentToken = lexer.readNextToken();
@@ -216,7 +221,7 @@ public class Interpreter {
             Identifier arg = new Identifier(name, type, true);
 
             args.put(name.value(), arg);
-            SCOPES.get(functionName).put(name.value(), null);
+            SCOPES.get(functionName).put(name.value(), arg);
 
             currentToken = lexer.readNextToken();
 
@@ -239,17 +244,15 @@ public class Interpreter {
 
         currentToken = lexer.readNextToken();
 
-        List<AbstractSyntaxTree> functionBody = statementList(functionName);
+        Function f = new Function(functionName, args);
+
+        FUNCTIONS.put(functionName, f);
+
+        f.setStatementList(statementList(functionName));
 
         currentToken = lexer.readNextToken();
 
-        Function f = new Function(functionName, args, functionBody);
 
-        if (FUNCTIONS.containsKey(functionName)) {
-            throw new IllegalStateException("Функция " + functionName + "с такими параметрами уже объявлена.");
-        }
-
-        FUNCTIONS.put(functionName, f);
     }
 
     private AbstractSyntaxTree functionCall(Function function) {
@@ -263,10 +266,20 @@ public class Interpreter {
 
         while (currentToken != Token.RPAREN) {
 
-            Token name = lexer.readNextToken();
+            currentToken = lexer.readNextToken();
+
+            if (currentToken == Token.RPAREN) {
+                break;
+            }
+
+            Token name = currentToken;
 
             if (name.type() != Token.Type.ID) {
                 throw new IllegalStateException("Ожидалось имя аргумента функции");
+            }
+
+            if (!function.args().containsKey(name.value())) {
+                throw new IllegalStateException("Неверный аргумент " + name + " + для функции " + function.name());
             }
 
             currentToken = lexer.readNextToken();
@@ -277,7 +290,7 @@ public class Interpreter {
 
             Token value = lexer.readNextToken();
 
-            if (value.type() != Token.Type.NUMBER) {
+            if (!(value.type() == Token.Type.NUMBER || value.type() == Token.Type.ID)) {
                 throw new IllegalStateException("Ожидалось значение аргумента функции");
             }
 
@@ -285,18 +298,10 @@ public class Interpreter {
             currentToken = lexer.readNextToken();
         }
 
-        var list = new ArrayList<AbstractSyntaxTree>();
-
-        for (AbstractSyntaxTree ast: function.statementList()) {
-            list.add(ast.copy());
-//            function.statementList().stream().map(AbstractSyntaxTree::copy).toList();
-        }
-
 
         FunctionCall functionCall = new FunctionCall(
                 function.name(),
-                args,
-                list
+                args
 
         );
 

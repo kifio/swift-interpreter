@@ -1,5 +1,9 @@
 package interpreter.ast;
 
+import java.sql.Ref;
+import java.util.Collection;
+import java.util.Set;
+
 import interpreter.Function;
 import interpreter.Identifier;
 import interpreter.Interpreter;
@@ -40,17 +44,27 @@ public class ASTVisitor {
         String scope = functionCall.name();
         Function function = Interpreter.FUNCTIONS.get(scope);
 
-//        Interpreter.SCOPES.get(scope).clear();
+        Collection<Identifier> localVariables = Interpreter.SCOPES.get(scope).values();
+
+        localVariables.forEach(Identifier::reset);
 
         for (Token name: functionCall.args().keySet()) {
             Identifier identifier = new Identifier(function.args().get(name.value()));
             Token value = functionCall.args().get(name);
-            ExpressionResult arg = visitNumber(new Number(value), identifier.getDataType());
+
+            ExpressionResult arg;
+
+            if (value.type() == Token.Type.ID) {
+                arg = visitVariable(new Reference(value), identifier.getDataType(), scope);
+            } else {
+                arg = visitNumber(new Number(value), identifier.getDataType());
+            }
+
             identifier.setValue(arg.value);
             Interpreter.SCOPES.get(scope).put(identifier.getName(), identifier);
         }
 
-        for (AbstractSyntaxTree statement : functionCall.statementList()) {
+        for (AbstractSyntaxTree statement : function.getStatementList().stream().map(AbstractSyntaxTree::copy).toList()) {
             visitAST(statement, scope);
         }
     }

@@ -16,34 +16,36 @@
 **/
 
 // Пример кода
-// let number: Int = -4
-// var a = -6
-// var b: Int
-// var c: Int = a + number
-// var x: Int
+let number: Int = -4
+var a = -6
+var b: Int
+var c: Int = a + number
+var x: Int
 let y: Double
 
 // number = 2 + a
-// b = 10 * a + 10 * number / 4
-// c = a - -b
-//
-// func someFunc() {}
-//
-// func someFunc(with: Int, args: Double) {}
+b = 10 * a + 10 * number / 4
+c = a - -b
 
-func someFunc(with: Int, args: Double) {
-    let and = 0
-    var body = 1 / args
-
-//    y = and + body + with
+func someFunc() {
+    let asdf = 100
 }
 
-someFunc(with: 10: args: 0.5)
-someFunc(with: 10: args: 2.5)
+// Полиморфизма нет
+func someFunc2(with: Int, args: Double) {
+    let and = 0
+    var body = 1 / args
+    let y = and + body + with
+    someFunc2(with: and, args: body)
+}
+
+someFunc()
+someFunc2(with: 10, args: 0.5)
+someFunc2(with: 10, args: 2.5)
 
 
-// x = 11
-// y = 20 / 7 + 3.14
+x = 11
+y = 20 / 7 + 3.14
 
 // Token[type=ID, value=number] = -4.0
 // Token[type=ID, value=a] = -4.0

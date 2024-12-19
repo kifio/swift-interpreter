@@ -58,6 +58,11 @@ public class Identifier {
         return !isConstant || !isInitialized;
     }
 
+    public void reset() {
+        isInitialized = false;
+        value = null;
+    }
+
     @Override
     public String toString() {
         return "Identifier{" +
