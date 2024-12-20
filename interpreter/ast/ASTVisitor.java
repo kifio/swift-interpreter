@@ -1,8 +1,7 @@
 package interpreter.ast;
 
-import java.sql.Ref;
-import java.util.Collection;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.UUID;
 
 import interpreter.Function;
 import interpreter.Identifier;
@@ -19,7 +18,7 @@ public class ASTVisitor {
         } else if (ast instanceof Assign assign) {
             visitAssign(assign, scope);
         } else if (ast instanceof FunctionCall function) {
-            visitFunction(function);
+            visitFunction(function, scope);
         }
     }
 
@@ -40,13 +39,11 @@ public class ASTVisitor {
         }
     }
 
-    void visitFunction(FunctionCall functionCall) {
-        String scope = functionCall.name();
-        Function function = Interpreter.FUNCTIONS.get(scope);
+    void visitFunction(FunctionCall functionCall, String outerScope) {
+        String scope = functionCall.name() + "_" + UUID.randomUUID();
+        Function function = Interpreter.FUNCTIONS.get(functionCall.name());
 
-        Collection<Identifier> localVariables = Interpreter.SCOPES.get(scope).values();
-
-        localVariables.forEach(Identifier::reset);
+        Interpreter.SCOPES.put(scope, new HashMap<>());
 
         for (Token name: functionCall.args().keySet()) {
             Identifier identifier = new Identifier(function.args().get(name.value()));
@@ -55,7 +52,7 @@ public class ASTVisitor {
             ExpressionResult arg;
 
             if (value.type() == Token.Type.ID) {
-                arg = visitVariable(new Reference(value), identifier.getDataType(), scope);
+                arg = visitVariable(new Reference(value), identifier.getDataType(), outerScope);
             } else {
                 arg = visitNumber(new Number(value), identifier.getDataType());
             }
@@ -64,14 +61,24 @@ public class ASTVisitor {
             Interpreter.SCOPES.get(scope).put(identifier.getName(), identifier);
         }
 
-        for (AbstractSyntaxTree statement : function.getStatementList().stream().map(AbstractSyntaxTree::copy).toList()) {
+        System.out.println(scope);
+
+        for (AbstractSyntaxTree statement : function.getStatementList()) {
             visitAST(statement, scope);
         }
     }
 
     Identifier visitLvalue(AbstractSyntaxTree lvalue, String scope) {
         Variable variable = (Variable) lvalue;
-        return Interpreter.find(variable.name().value(), scope);
+        if (Interpreter.SCOPES.get(Interpreter.GLOBAL_SCOPE).containsKey(variable.name().value())) {
+            return Interpreter.SCOPES.get(Interpreter.GLOBAL_SCOPE).get(variable.name().value());
+        } else if (Interpreter.SCOPES.get(scope).containsKey(variable.name().value())) {
+            return Interpreter.SCOPES.get(scope).get(variable.name().value());
+        } else {
+            Identifier identifier = new Identifier(variable.name(), variable.valueType(), variable.type() == Token.LET);
+            Interpreter.SCOPES.get(scope).put(variable.name().value(), identifier);
+            return identifier;
+        }
     }
 
     ExpressionResult visitRvalue(AbstractSyntaxTree ast, Identifier.DataType valueType, String scope) {
@@ -93,10 +100,7 @@ public class ASTVisitor {
             return visitRvalue(op.right(), valueType, scope);
         } else if (op.opToken() == Token.MINUS) {
             ExpressionResult result = visitRvalue(op.right(), valueType, scope);
-            return new ExpressionResult(
-                    result.type,
-                    -result.value
-            );
+            return new ExpressionResult( result.type, -result.value);
         } else {
             throw new IllegalStateException("Неизвестная унарная операция при вычислении: " + op.opToken());
         }
@@ -112,7 +116,7 @@ public class ASTVisitor {
             } catch (NumberFormatException e) {
                 return new ExpressionResult(
                         Identifier.DataType.DOUBLE,
-                        Integer.parseInt(number.token().value())
+                        Double.parseDouble(number.token().value())
                 );
             }
         } else if (valueType == Identifier.DataType.INTEGER) {
@@ -129,9 +133,13 @@ public class ASTVisitor {
     }
 
     ExpressionResult visitVariable(Reference reference, Identifier.DataType valueType, String scope) {
-        Identifier identifier = Interpreter.find(reference.token().value(), scope);
+        Identifier identifier;
 
-        if (identifier == null) {
+        if (Interpreter.SCOPES.get(scope).containsKey(reference.token().value())) {
+            identifier = Interpreter.SCOPES.get(scope).get(reference.token().value());
+        } else if (Interpreter.SCOPES.get(Interpreter.GLOBAL_SCOPE).containsKey(reference.token().value())) {
+            identifier = Interpreter.SCOPES.get(Interpreter.GLOBAL_SCOPE).get(reference.token().value());
+        } else {
             throw new NumberFormatException("Переменная " + reference.token().value() + " недоступна в " + scope);
         }
 
@@ -152,9 +160,8 @@ public class ASTVisitor {
 
     private static class ExpressionResult {
 
-        Identifier.DataType type;
-
-        double value;
+        private Identifier.DataType type;
+        private double value;
 
         ExpressionResult(Identifier.DataType type, double value) {
             this.type = type;
@@ -173,13 +180,10 @@ public class ASTVisitor {
             } else if (operation == Token.DIV) {
                 resultValue = value / result.value;
             } else {
-                throw new IllegalStateException(String.format("Неизвестная операция при вычислении", operation));
+                throw new IllegalStateException(String.format("Неизвестная операция при вычислении %s", operation.value()));
             }
 
-            return new ExpressionResult(
-                    determineType(result.type),
-                    resultValue
-            );
+            return new ExpressionResult(determineType(result.type), resultValue);
         }
 
         private Identifier.DataType determineType(Identifier.DataType type) {

@@ -30,11 +30,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.ToLongBiFunction;
 
 public class Interpreter {
 
@@ -89,7 +87,7 @@ public class Interpreter {
     private List<AbstractSyntaxTree> statementList(String scope) {
         var statements = new ArrayList<AbstractSyntaxTree>();
 
-        while (currentToken == Token.NEW_LINE || currentToken == Token.SEMI) {
+        do {
             currentToken = lexer.readNextToken();
 
             if (currentToken == Token.NEW_LINE || currentToken == Token.SEMI) {
@@ -105,7 +103,7 @@ public class Interpreter {
             } else {
                 statements.add(assignStatement(variableDeclaration(scope), scope));
             }
-        }
+        } while (currentToken == Token.NEW_LINE || currentToken == Token.SEMI);
 
         if (currentToken == Token.EOF || currentToken == Token.CLOSING_CURLY_BRACE) {
             return statements;
@@ -127,14 +125,6 @@ public class Interpreter {
             }
 
             Token name = currentToken;
-            SCOPES.putIfAbsent(scope, new HashMap<>());
-
-            if (SCOPES.get(scope).containsKey(name.value())) {
-                throw new IllegalStateException(
-                        "Идентификатор " + currentToken.value() + " уже объявлен."
-                );
-            }
-
             Token valueType = null;
             currentToken = lexer.readNextToken();
 
@@ -151,9 +141,15 @@ public class Interpreter {
                 currentToken = lexer.readNextToken();
             }
 
-            SCOPES.get(scope).put(name.value(), new Identifier(name, valueType, variableType == Token.LET));
+            if (scope.equals(GLOBAL_SCOPE)) {
+                if (SCOPES.get(GLOBAL_SCOPE).containsKey(name.value())) {
+                    throw new IllegalStateException("Переменная уже объявлена!");
+                }
 
-            return new Variable(name);
+                SCOPES.get(GLOBAL_SCOPE).put(name.value(), new Identifier(name, valueType, variableType == Token.LET));
+            }
+
+            return new Variable(variableType, name, valueType);
         }
 
         if (currentToken.type() != Token.Type.ID) {
@@ -163,17 +159,11 @@ public class Interpreter {
         }
 
         Token name = currentToken;
-        
-        if (SCOPES.get(scope).containsKey(name.value()) || SCOPES.get(GLOBAL_SCOPE).containsKey(name.value())) {
-            currentToken = lexer.readNextToken();
-            return new Variable(name);
-        }
-
-        throw new IllegalStateException("Некорректный токен: " + currentToken.value());
+        currentToken = lexer.readNextToken();
+        return new Variable(null, name, null);
     }
 
     private AbstractSyntaxTree assignStatement(AbstractSyntaxTree variable, String scope) {
-
         if (currentToken == Token.NEW_LINE) {
             return variable;
         }
@@ -184,7 +174,6 @@ public class Interpreter {
 
         var assignToken = currentToken;
         currentToken = lexer.readNextToken();
-
         return new Assign(variable, assignToken, expr(scope));
     }
 
@@ -196,20 +185,16 @@ public class Interpreter {
         }
 
         String functionName = currentToken.value();
-
         currentToken = lexer.readNextToken();
 
         if (currentToken != Token.LPAREN) {
             throw new IllegalStateException("Ожидался список аргументов функции");
         }
 
-        HashMap<String, Identifier> args = new HashMap<>();
-        SCOPES.putIfAbsent(functionName, new HashMap<>());
-
+        Map<String, Identifier> args = new HashMap<>();
         currentToken = lexer.readNextToken();
 
         while (currentToken != Token.RPAREN)  {
-
             Token name = currentToken;
             Token colon = lexer.readNextToken();
             Token type = lexer.readNextToken();
@@ -218,11 +203,7 @@ public class Interpreter {
                 throw new IllegalStateException("Ожидался список аргументов функции вида имя: тип, имя: тип....");
             }
 
-            Identifier arg = new Identifier(name, type, true);
-
-            args.put(name.value(), arg);
-            SCOPES.get(functionName).put(name.value(), arg);
-
+            args.put(name.value(), new Identifier(name, type, true));
             currentToken = lexer.readNextToken();
 
             if (currentToken != Token.COMMA) {
@@ -243,16 +224,10 @@ public class Interpreter {
         }
 
         currentToken = lexer.readNextToken();
-
         Function f = new Function(functionName, args);
-
         FUNCTIONS.put(functionName, f);
-
         f.setStatementList(statementList(functionName));
-
         currentToken = lexer.readNextToken();
-
-
     }
 
     private AbstractSyntaxTree functionCall(Function function) {
@@ -265,7 +240,6 @@ public class Interpreter {
         Map<Token, Token> args = new HashMap<>();
 
         while (currentToken != Token.RPAREN) {
-
             currentToken = lexer.readNextToken();
 
             if (currentToken == Token.RPAREN) {
@@ -288,7 +262,8 @@ public class Interpreter {
                 throw new IllegalStateException("Неправильное форматирование списка аргуементов функции");
             }
 
-            Token value = lexer.readNextToken();
+            currentToken = lexer.readNextToken();
+            Token value = currentToken;
 
             if (!(value.type() == Token.Type.NUMBER || value.type() == Token.Type.ID)) {
                 throw new IllegalStateException("Ожидалось значение аргумента функции");
@@ -299,15 +274,8 @@ public class Interpreter {
         }
 
 
-        FunctionCall functionCall = new FunctionCall(
-                function.name(),
-                args
-
-        );
-
+        FunctionCall functionCall = new FunctionCall(function.name(), args);
         currentToken = lexer.readNextToken();
-
-
         return  functionCall;
     }
 
@@ -356,13 +324,5 @@ public class Interpreter {
         }
 
         throw new IllegalStateException("Некорректный токен: " + currentToken.value());
-    }
-
-    public static Identifier find(String variable, String scope) {
-        if (SCOPES.containsKey(scope) && SCOPES.get(scope).containsKey(variable)) {
-            return SCOPES.get(scope).get(variable);
-        } else {
-            return SCOPES.get(GLOBAL_SCOPE).get(variable);
-        }
     }
 }

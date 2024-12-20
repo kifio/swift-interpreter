@@ -1,57 +1,19 @@
-/**
-    program : compound_statement
-    compound_statement : statement_list
-    statement_list : statement | statement (SEMI | NEW_LINE) statement_list
-    statement : compound_statement | assignment_statement | empty
-    assignment_statement : ((LET | VAR) | empty) variable (COLON (INT | DOUBLE) | empty) ASSIGN expr
-    empty :
-    expr: term ((PLUS | MINUS) term)*
-    term: factor ((MUL | DIV) factor)*
-    factor : PLUS factor
-           | MINUS factor
-           | INTEGER
-           | LPAREN expr RPAREN
-           | variable
-    variable: ID
-**/
-
 // Пример кода
-let number: Int = -4
-var a = -6
-var b: Int
-var c: Int = a + number
-var x: Int
-let y: Double
+var foo = 112
+var bar = 226
 
-// number = 2 + a
-b = 10 * a + 10 * number / 4
-c = a - -b
+bar = foo + bar
 
-func someFunc() {
-    let asdf = 100
+func func_bar(arg2: Double) {
+    var func_bar_quux = arg2 / arg2
 }
 
-// Полиморфизма нет
-func someFunc2(with: Int, args: Double) {
-    let and = 0
-    var body = 1 / args
-    let y = and + body + with
-    someFunc2(with: and, args: body)
+func func_foo(arg0: Int, arg1: Int) {
+    let func_foo_baz: Double = (arg0 + arg1 + bar) * 1.0
+    func_bar(arg2: func_foo_baz)
 }
 
-someFunc()
-someFunc2(with: 10, args: 0.5)
-someFunc2(with: 10, args: 2.5)
+func_foo(arg0: bar, arg1: 100)
 
-
-x = 11
-y = 20 / 7 + 3.14
-
-// Token[type=ID, value=number] = -4.0
-// Token[type=ID, value=a] = -4.0
-// Token[type=ID, value=c] = -8.0
-// Token[type=ID, value=b] = -50.0
-// Token[type=ID, value=c] = -54.0
-// Token[type=ID, value=x] = 11.0
-// Token[type=ID, value=y] = 5.997142857142857
-// 0.0
+let quux = bar / 1.0
+func_bar(arg2: quux)

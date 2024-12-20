@@ -29,6 +29,7 @@ public class Identifier {
     }
     public Identifier(Identifier identifier) {
         this.name = identifier.name;
+        this.value = identifier.value;
         this.dataType = identifier.dataType;
         this.isConstant = identifier.isConstant;
     }
@@ -56,11 +57,6 @@ public class Identifier {
 
     public boolean canBeAssigned() {
         return !isConstant || !isInitialized;
-    }
-
-    public void reset() {
-        isInitialized = false;
-        value = null;
     }
 
     @Override

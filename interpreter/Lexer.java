@@ -2,10 +2,11 @@ package interpreter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 class Lexer {
 
-    private final HashMap<String, Token> keyWords = new HashMap<>();
+    private final Map<String, Token> keyWords = new HashMap<>();
     private int pos;
     private char[] text;
 

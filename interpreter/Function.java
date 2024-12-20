@@ -4,13 +4,14 @@ import interpreter.ast.AbstractSyntaxTree;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Function {
-    private String name;
-    private HashMap<String, Identifier> args;
+    private final String name;
+    private final Map<String, Identifier> args;
     private List<AbstractSyntaxTree> statementList;
 
-    public Function(String name, HashMap<String, Identifier> args) {
+    public Function(String name, Map<String, Identifier> args) {
         this.name = name;
         this.args = args;
     }
@@ -19,12 +20,12 @@ public class Function {
         return name;
     }
 
-    public HashMap<String, Identifier> args() {
+    public Map<String, Identifier> args() {
         return args;
     }
 
     public List<AbstractSyntaxTree> getStatementList() {
-        return statementList;
+        return statementList.stream().map(AbstractSyntaxTree::copy).toList();
     }
 
     public void setStatementList(List<AbstractSyntaxTree> statementList) {
